@@ -6,7 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { store } from "@/store";
-import {Toast} from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -18,7 +18,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider attribute="class" defaultTheme="light">
             {children}
-            <Toast />
+            <Toaster />
           </ThemeProvider>
         </QueryClientProvider>
       </SessionProvider>

@@ -29,11 +29,11 @@ export async function middleware(req: NextRequest) {
 
   if (!session) {
     // If not authenticated and trying to access a protected route
-    if (!isPublicPath && !isApiPath) {
-      const signInUrl = new URL("/sign-in", req.url);
-      signInUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(signInUrl);
-    }
+    // if (!isPublicPath && !isApiPath) {
+    //   const signInUrl = new URL("/sign-in", req.url);
+    //   signInUrl.searchParams.set("callbackUrl", pathname);
+    //   return NextResponse.redirect(signInUrl);
+    // }
 
     // Let public routes and API routes pass
     return NextResponse.next();
