@@ -1,3 +1,4 @@
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -18,13 +19,14 @@ module.exports = {
     extend: {
       colors: {
         "ainala-blue": "#1976d2",
+        "ainala-yellow": "#ffd700",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#1976d2",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
