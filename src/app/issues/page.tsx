@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FaSearch, FaThumbsUp, FaComment, FaEye } from "react-icons/fa";
+import {
+  FaSearch,
+  FaThumbsUp,
+  FaComment,
+  FaEye,
+  FaFilter,
+} from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -156,221 +162,236 @@ export default function IssuesPage() {
   };
 
   return (
-    <div className="container py-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Городские проблемы
-        </h1>
-        <p className="text-gray-500">
-          Список проблем, о которых сообщили жители города
-        </p>
-      </div>
-
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-        <div className="relative flex-1">
-          <FaSearch className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Поиск проблем..."
-            className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+    <div className="w-full py-6 sm:py-8">
+      <div className="max-w-[1200px] px-[15px] mx-auto space-y-4 sm:space-y-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+            Городские проблемы
+          </h1>
+          <p className="text-sm sm:text-base text-gray-500">
+            Список проблем, о которых сообщили жители города
+          </p>
         </div>
-        <div className="w-full md:w-64">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
-              <SelectValue placeholder="Все категории" />
-            </SelectTrigger>
-            <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
-              {categories.map((category) => (
-                <SelectItem
-                  key={category.value}
-                  value={category.value}
-                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
-                >
-                  {category.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
-      <Tabs defaultValue="to do" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-3 h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
-          <TabsTrigger
-            value="to do"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-500 data-[state=active]:shadow-sm"
-          >
-            К выполнению
-          </TabsTrigger>
-          <TabsTrigger
-            value="progress"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-500 data-[state=active]:shadow-sm"
-          >
-            В работе
-          </TabsTrigger>
-          <TabsTrigger
-            value="done"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-500 data-[state=active]:shadow-sm"
-          >
-            Выполнено
-          </TabsTrigger>
-        </TabsList>
-
-        {["to do", "progress", "done"].map((status) => (
-          <TabsContent key={status} value={status} className="space-y-4">
-            {paginatedIssues(status).length > 0 ? (
-              <>
-                {paginatedIssues(status).map((issue) => (
-                  <Card
-                    key={issue.id}
-                    className="border border-gray-200 rounded-lg bg-white shadow-sm"
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Input
+              placeholder="Поиск проблем..."
+              className="!pl-[35px] h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="w-full sm:w-auto sm:min-w-[200px]">
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
+              <SelectTrigger className="h-9 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm">
+                <div className="flex items-center">
+                  <FaFilter className="mr-2 h-3 w-3 text-blue-500" />
+                  <SelectValue placeholder="Все категории" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
+                {categories.map((category) => (
+                  <SelectItem
+                    key={category.value}
+                    value={category.value}
+                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-xs sm:text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
                   >
-                    <CardHeader className="p-4">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                        <div>
-                          <CardTitle className="text-xl text-gray-900">
-                            {issue.title}
-                          </CardTitle>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            <Badge className="inline-flex items-center rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-semibold">
-                              {getCategoryName(issue.category)}
-                            </Badge>
-                            <Badge
-                              className={
-                                issue.status === "done"
-                                  ? "bg-green-100 text-green-800 hover:bg-green-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                  : issue.status === "progress"
-                                  ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                  : "bg-gray-100 text-gray-800 hover:bg-gray-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                              }
-                            >
-                              {getStatusName(issue.status)}
-                            </Badge>
-                          </div>
-                        </div>
-                        <Link href={`/issues/${issue.id}`}>
-                          <Button className="h-9 rounded-md px-3 border border-gray-200 bg-white text-gray-900 hover:bg-gray-100 flex items-center gap-2">
-                            <FaEye className="h-4 w-4" />
-                            Подробнее
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <CardDescription className="mb-4 text-sm text-gray-500">
-                        {issue.description.substring(0, 150)}
-                        {issue.description.length > 150 && "..."}
-                      </CardDescription>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-500">Создано:</p>
-                          <p>{formatDate(issue.createdAt)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Автор:</p>
-                          <p>{issue.userName}</p>
-                        </div>
-                        {issue.assignedTo && (
-                          <div>
-                            <p className="text-gray-500">Ответственный:</p>
-                            <p>{issue.assignedTo}</p>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="p-4 pt-0 flex items-center justify-between">
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-1">
-                          <FaThumbsUp className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">
-                            {issue.likes}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <FaComment className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">
-                            {issue.comments}
-                          </span>
-                        </div>
-                      </div>
-                      {isAuthenticated && (
-                        <Button className="h-9 rounded-md px-3 bg-transparent hover:bg-gray-100">
-                          <FaThumbsUp className="h-4 w-4 mr-2" />
-                          Нравится
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
+                    {category.label}
+                  </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-                {totalPages(status) > 1 && (
-                  <div className="flex justify-center gap-2 mt-6">
-                    <Button
-                      className="h-9 rounded-md px-3 border border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      disabled={currentPage === 1}
+        <Tabs defaultValue="to do" className="w-full space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10 items-center justify-center rounded-md bg-blue-50 p-1 text-gray-600">
+            <TabsTrigger
+              value="to do"
+              className="text-xs sm:text-sm inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+            >
+              К выполнению
+            </TabsTrigger>
+            <TabsTrigger
+              value="progress"
+              className="text-xs sm:text-sm inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+            >
+              В работе
+            </TabsTrigger>
+            <TabsTrigger
+              value="done"
+              className="text-xs sm:text-sm inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+            >
+              Выполнено
+            </TabsTrigger>
+          </TabsList>
+
+          {["to do", "progress", "done"].map((status) => (
+            <TabsContent key={status} value={status} className="space-y-4">
+              {paginatedIssues(status).length > 0 ? (
+                <>
+                  {paginatedIssues(status).map((issue) => (
+                    <Card
+                      key={issue.id}
+                      className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow transition-shadow"
                     >
-                      Предыдущая
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from(
-                        { length: totalPages(status) },
-                        (_, i) => i + 1
-                      ).map((page) => (
-                        <Button
-                          key={page}
-                          className={
-                            currentPage === page
-                              ? "h-8 w-8 p-0 rounded-md bg-blue-500 text-white hover:bg-blue-600"
-                              : "h-8 w-8 p-0 rounded-md border border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
-                          }
-                          onClick={() => setCurrentPage(page)}
-                        >
-                          {page}
-                        </Button>
-                      ))}
+                      <CardHeader className="p-3 sm:p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                          <div>
+                            <CardTitle className="text-base sm:text-lg md:text-xl text-gray-900 line-clamp-2">
+                              {issue.title}
+                            </CardTitle>
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1.5">
+                              <Badge className="inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-xs font-semibold">
+                                {getCategoryName(issue.category)}
+                              </Badge>
+                              <Badge
+                                className={
+                                  issue.status === "done"
+                                    ? "bg-green-100 text-green-800 hover:bg-green-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                                    : issue.status === "progress"
+                                    ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                                    : "bg-gray-100 text-gray-800 hover:bg-gray-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                                }
+                              >
+                                {getStatusName(issue.status)}
+                              </Badge>
+                            </div>
+                          </div>
+                          <Link
+                            href={`/issues/${issue.id}`}
+                            className="w-full sm:w-auto mt-2 sm:mt-0"
+                          >
+                            <Button className="w-full sm:w-auto h-8 sm:h-9 rounded-md px-2 sm:px-3 border border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 flex items-center justify-center gap-1.5">
+                              <FaEye className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="text-xs sm:text-sm">
+                                Подробнее
+                              </span>
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="px-3 sm:px-4 py-0">
+                        <CardDescription className="mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500 line-clamp-2">
+                          {issue.description.substring(0, 150)}
+                          {issue.description.length > 150 && "..."}
+                        </CardDescription>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
+                          <div>
+                            <p className="text-gray-500">Создано:</p>
+                            <p className="font-medium">
+                              {formatDate(issue.createdAt)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">Автор:</p>
+                            <p className="font-medium">{issue.userName}</p>
+                          </div>
+                          {issue.assignedTo && (
+                            <div>
+                              <p className="text-gray-500">Ответственный:</p>
+                              <p className="font-medium">{issue.assignedTo}</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter className="px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-gray-100 mt-3">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                          <div className="flex items-center gap-1.5">
+                            <FaThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                            <span className="text-xs sm:text-sm text-gray-700 font-medium">
+                              {issue.likes}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <FaComment className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                            <span className="text-xs sm:text-sm text-gray-700 font-medium">
+                              {issue.comments}
+                            </span>
+                          </div>
+                        </div>
+                        {isAuthenticated && (
+                          <Button className="w-full sm:w-auto h-8 rounded-md px-3 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
+                            <FaThumbsUp className="h-3 w-3 mr-1.5" />
+                            <span className="text-xs">Нравится</span>
+                          </Button>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  ))}
+
+                  {totalPages(status) > 1 && (
+                    <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-6">
+                      <Button
+                        className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={currentPage === 1}
+                      >
+                        Назад
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from(
+                          { length: totalPages(status) },
+                          (_, i) => i + 1
+                        ).map((page) => (
+                          <Button
+                            key={page}
+                            className={
+                              currentPage === page
+                                ? "h-8 w-8 p-0 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                                : "h-8 w-8 p-0 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+                            }
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            <span className="text-xs">{page}</span>
+                          </Button>
+                        ))}
+                      </div>
+                      <Button
+                        className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages(status), prev + 1)
+                          )
+                        }
+                        disabled={currentPage === totalPages(status)}
+                      >
+                        Далее
+                      </Button>
                     </div>
-                    <Button
-                      className="h-9 rounded-md px-3 border border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
-                      onClick={() =>
-                        setCurrentPage((prev) =>
-                          Math.min(totalPages(status), prev + 1)
-                        )
-                      }
-                      disabled={currentPage === totalPages(status)}
-                    >
-                      Следующая
-                    </Button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold mb-1 text-gray-900">
-                  Проблемы не найдены
-                </h3>
-                <p className="text-gray-500 mb-6">
-                  {searchQuery || selectedCategory !== "all"
-                    ? "Попробуйте изменить параметры поиска"
-                    : `В разделе "${getStatusName(status)}" пока нет проблем`}
-                </p>
-                {isAuthenticated && (
-                  <Link href="/account/add-issue">
-                    <Button className="h-10 px-4 py-2 bg-blue-500 text-white hover:bg-blue-600">
-                      Добавить проблему
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+                  <div className="text-4xl sm:text-6xl mb-4">🔍</div>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-1 text-gray-900">
+                    Проблемы не найдены
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6 px-4">
+                    {searchQuery || selectedCategory !== "all"
+                      ? "Попробуйте изменить параметры поиска"
+                      : `В разделе "${getStatusName(status)}" пока нет проблем`}
+                  </p>
+                  {isAuthenticated && (
+                    <Link href="/account/add-issue">
+                      <Button className="h-9 sm:h-10 px-3 sm:px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 text-xs sm:text-sm">
+                        Добавить проблему
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </div>
   );
 }
