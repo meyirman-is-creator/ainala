@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -67,12 +65,8 @@
 }
 
 
-
-/* Перемещаем определение класса .border внутрь слоя utilities */
-@layer utilities {
-  .border {
-    border-width: 1px;
-    border-style: solid;
-    border-color: hsl(var(--border));
-  }
+.custom-border {
+  border-width: 1px;
+  border-style: solid;
+  border-color: hsl(var(--border));
 }
