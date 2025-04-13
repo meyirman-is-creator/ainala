@@ -1,9 +1,9 @@
+// src/app/account/page.tsx
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+import { Calendar } from "@/components/ui/calendar";
 import {
   FaPlusCircle,
   FaChartLine,
@@ -23,16 +23,9 @@ import { formatDate } from "@/lib/utils";
 
 export default function AccountPage() {
   const { user } = useAppSelector((state) => state.auth);
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const handleDateChange = useCallback((value: Date | Date[]) => {
-    if (value instanceof Date) {
-      setDate(value);
-    } else if (Array.isArray(value) && value.length > 0) {
-      setDate(value[0]);
-    }
-  }, []);
-
+  // Имитация данных проблем
   const [issues] = useState([
     {
       id: "1",
@@ -61,6 +54,7 @@ export default function AccountPage() {
   ]);
 
   const filteredIssues = issues.filter((issue) => {
+    if (!date) return false;
     const issueDate = new Date(issue.createdAt);
     return (
       issueDate.getDate() === date.getDate() &&
@@ -76,11 +70,23 @@ export default function AccountPage() {
     todo: issues.filter((issue) => issue.status === "to do").length,
   };
 
+  // Function to check if a date has issues
+  const hasIssueOnDate = (day: Date) => {
+    return issues.some((issue) => {
+      const issueDate = new Date(issue.createdAt);
+      return (
+        day.getDate() === issueDate.getDate() &&
+        day.getMonth() === issueDate.getMonth() &&
+        day.getFullYear() === issueDate.getFullYear()
+      );
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
             Добро пожаловать, {user?.name}
           </h1>
           <p className="text-gray-500">
@@ -88,7 +94,7 @@ export default function AccountPage() {
           </p>
         </div>
         <Link href="/account/add-issue">
-          <Button className="bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md flex items-center">
+          <Button className="w-full sm:w-auto bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md flex items-center">
             <FaPlusCircle className="mr-2" />
             Добавить проблему
           </Button>
@@ -98,61 +104,63 @@ export default function AccountPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between p-4">
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-white">
                 <CardTitle className="text-sm font-medium text-gray-900">
                   Всего проблем
                 </CardTitle>
                 <FaChartLine className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-gray-900 mt-2">
                   {stats.total}
                 </p>
               </CardContent>
             </Card>
-            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between p-4">
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between p-4 bg-gradient-to-r from-green-50 to-white">
                 <CardTitle className="text-sm font-medium text-gray-900">
                   Решено
                 </CardTitle>
                 <FaCheckCircle className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <p className="text-2xl font-bold text-gray-900">{stats.done}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-2">
+                  {stats.done}
+                </p>
               </CardContent>
             </Card>
-            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between p-4">
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between p-4 bg-gradient-to-r from-yellow-50 to-white">
                 <CardTitle className="text-sm font-medium text-gray-900">
                   В работе
                 </CardTitle>
                 <FaClock className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-gray-900 mt-2">
                   {stats.inProgress}
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
-            <CardHeader className="p-4">
-              <CardTitle className="text-2xl font-semibold text-gray-900">
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-white">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-900">
                 Последние проблемы
               </CardTitle>
               <CardDescription className="text-sm text-gray-500">
                 Список ваших последних проблем для быстрого доступа
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
+            <CardContent className="p-4 sm:p-6 pt-0">
               {issues.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-4 mt-2">
                   {issues.slice(0, 5).map((issue) => (
                     <div
                       key={issue.id}
-                      className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                      className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0 hover:bg-gray-50 p-2 rounded-md transition-colors"
                     >
                       <div>
                         <h3 className="font-medium text-gray-900">
@@ -186,10 +194,10 @@ export default function AccountPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-4">
+                <div className="text-center py-8 bg-gray-50 rounded-lg mt-4">
                   <p className="text-gray-500">У вас пока нет проблем</p>
                   <Link href="/account/add-issue">
-                    <Button className="mt-2 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md">
+                    <Button className="mt-4 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md">
                       Добавить проблему
                     </Button>
                   </Link>
@@ -200,34 +208,44 @@ export default function AccountPage() {
         </div>
 
         <div className="space-y-6">
-          <Card className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
-            <CardHeader className="p-0 pb-4">
-              <CardTitle className="text-2xl font-semibold text-gray-900">
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+            <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-white">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-900">
                 Календарь активности
               </CardTitle>
             </CardHeader>
-            <div className="calendar-container">
+            <CardContent className="p-4">
               <Calendar
-                onChange={handleDateChange}
-                value={date}
-                className="w-full border-none"
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                className="rounded-md border shadow"
+                modifiers={{
+                  hasIssue: (day) => hasIssueOnDate(day),
+                }}
+                modifiersClassNames={{
+                  hasIssue: "bg-blue-50 font-bold text-blue-600",
+                  selected: "bg-blue-100 text-blue-800",
+                }}
+                fromMonth={new Date(2023, 0)}
+                toMonth={new Date(2025, 11)}
               />
-            </div>
+            </CardContent>
           </Card>
 
-          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
-            <CardHeader className="p-4">
-              <CardTitle className="text-2xl font-semibold text-gray-900">
-                Проблемы за {formatDate(date)}
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+            <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-white">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-900">
+                Проблемы за {date ? formatDate(date) : "выбранную дату"}
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
+            <CardContent className="p-4 pt-2">
               {filteredIssues.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-4 mt-2">
                   {filteredIssues.map((issue) => (
                     <div
                       key={issue.id}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md border border-gray-100 transition-colors"
                     >
                       <div>
                         <h3 className="font-medium text-gray-900">
@@ -258,9 +276,9 @@ export default function AccountPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4">
-                  Нет проблем за выбранную дату
-                </p>
+                <div className="text-center py-8 bg-gray-50 rounded-lg mt-4">
+                  <p className="text-gray-500">Нет проблем за выбранную дату</p>
+                </div>
               )}
             </CardContent>
           </Card>

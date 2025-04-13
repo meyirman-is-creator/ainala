@@ -1,3 +1,4 @@
+// src/app/account/layout.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -24,9 +25,13 @@ export default function AccountLayout({
   }
 
   return (
-    <div className="container grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 py-8">
-      <Sidebar />
-      <main>{children}</main>
+    <div className="bg-gray-50 py-6 min-h-screen">
+      <div className="container max-w-[1200px] px-[15px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
+          <Sidebar />
+          <main>{children}</main>
+        </div>
+      </div>
     </div>
   );
 }
