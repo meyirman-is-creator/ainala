@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -35,18 +35,18 @@ export function Sidebar() {
     <div className="pb-12">
       <div className="space-y-4 py-4">
         <div className="px-4 py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
+          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight text-gray-900">
             Личный кабинет
           </h2>
           <div className="space-y-1">
             {sidebarItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <Button
-                  variant={pathname === item.href ? "default" : "ghost"}
-                  size="sm"
                   className={cn(
-                    "w-full justify-start",
-                    pathname === item.href ? "text-white" : ""
+                    "w-full justify-start h-9 rounded-md px-3",
+                    pathname === item.href
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-transparent text-gray-900 hover:bg-gray-100"
                   )}
                 >
                   {item.icon}

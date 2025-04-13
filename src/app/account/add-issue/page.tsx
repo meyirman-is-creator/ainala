@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,10 +73,8 @@ export default function AddIssuePage() {
     },
   });
 
-  // В реальном приложении здесь бы загружались данные проблемы для редактирования
-  useState(() => {
+  useEffect(() => {
     if (issueId) {
-      // Имитация загрузки данных
       setTimeout(() => {
         form.reset({
           title: "Яма на дороге",
@@ -87,17 +85,14 @@ export default function AddIssuePage() {
         setIsEdit(true);
       }, 500);
     }
-  });
+  }, [issueId, form]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     setError(null);
 
     try {
-      // Имитация запроса к API
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // После успешного добавления или редактирования переходим к списку проблем
       router.push("/account/issues");
     } catch (err) {
       setError("Ошибка при сохранении проблемы");
@@ -119,21 +114,23 @@ export default function AddIssuePage() {
         <h1 className="text-2xl font-bold tracking-tight">
           {isEdit ? "Редактирование проблемы" : "Добавление проблемы"}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-gray-500">
           {isEdit
             ? "Отредактируйте информацию о проблеме"
             : "Заполните форму, чтобы сообщить о городской проблеме"}
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Информация о проблеме</CardTitle>
-          <CardDescription>
+      <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
+        <CardHeader className="flex flex-col space-y-1.5 p-6">
+          <CardTitle className="text-2xl font-semibold">
+            Информация о проблеме
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
             Подробно опишите проблему и приложите фотографии
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6 pt-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -141,18 +138,20 @@ export default function AddIssuePage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Заголовок</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Заголовок
+                    </FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input
                           placeholder="Например: Неработающий фонарь на улице Ленина"
                           {...field}
-                          className="pl-10"
+                          className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                         />
                       </FormControl>
                       <FaHeading className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     </div>
-                    <FormMessage />
+                    <FormMessage className="text-sm font-medium text-red-500" />
                   </FormItem>
                 )}
               />
@@ -162,21 +161,24 @@ export default function AddIssuePage() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Категория</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Категория
+                    </FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
-                          <SelectTrigger className="w-full pl-10">
+                          <SelectTrigger className="w-full pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
                             <SelectValue placeholder="Выберите категорию" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
                             {categories.map((category) => (
                               <SelectItem
                                 key={category.value}
                                 value={category.value}
+                                className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
                               >
                                 {category.label}
                               </SelectItem>
@@ -186,7 +188,7 @@ export default function AddIssuePage() {
                       </FormControl>
                       <FaList className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
                     </div>
-                    <FormMessage />
+                    <FormMessage className="text-sm font-medium text-red-500" />
                   </FormItem>
                 )}
               />
@@ -196,26 +198,31 @@ export default function AddIssuePage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Описание</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Описание
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Подробно опишите проблему, укажите адрес и другие важные детали"
                         {...field}
                         rows={6}
+                        className="flex min-h-[80px] w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-sm font-medium text-red-500" />
                   </FormItem>
                 )}
               />
 
               <div className="space-y-2">
-                <FormLabel>Фотографии</FormLabel>
-                <div className="border border-input bg-background rounded-md p-6 flex flex-col items-center justify-center">
+                <FormLabel className="text-sm font-medium">
+                  Фотографии
+                </FormLabel>
+                <div className="border border-gray-200 bg-white rounded-md p-6 flex flex-col items-center justify-center">
                   <FaFileUpload className="h-8 w-8 text-gray-400 mb-2" />
                   <div className="text-sm text-center space-y-2">
                     <p>Перетащите файлы сюда или нажмите для выбора</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500">
                       JPG, PNG или GIF. Максимум 5 файлов.
                     </p>
                   </div>
@@ -230,7 +237,7 @@ export default function AddIssuePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mt-4"
+                    className="mt-4 border border-gray-200 bg-white hover:bg-gray-100"
                     onClick={() => document.getElementById("photos")?.click()}
                     type="button"
                   >
@@ -242,35 +249,37 @@ export default function AddIssuePage() {
                     <p className="text-sm font-medium">
                       Выбрано файлов: {photos.length}
                     </p>
-                    <ul className="text-sm text-muted-foreground mt-1">
+                    <ul className="text-sm text-gray-500 mt-1">
                       {photos.map((file, index) => (
                         <li key={index}>{file.name}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                <FormDescription>
+                <FormDescription className="text-sm text-gray-500">
                   Рекомендуется приложить фотографии проблемы для лучшего
                   понимания ситуации.
                 </FormDescription>
               </div>
 
               {error && (
-                <div className="text-sm font-medium text-destructive">
-                  {error}
-                </div>
+                <div className="text-sm font-medium text-red-500">{error}</div>
               )}
 
               <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="outline"
-                  className="mr-2"
+                  className="mr-2 h-10 px-4 py-2 border border-gray-200 bg-white hover:bg-gray-100"
                   onClick={() => router.back()}
                 >
                   Отмена
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="h-10 px-4 py-2 bg-blue-500 text-white hover:bg-blue-600"
+                >
                   {loading
                     ? "Сохранение..."
                     : isEdit

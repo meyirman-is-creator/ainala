@@ -18,6 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
+      <head>
+        
+      </head>
       <body className={inter.className}>
         <ReduxProvider>
           <QueryProvider>

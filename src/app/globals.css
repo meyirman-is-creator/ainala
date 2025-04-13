@@ -64,9 +64,8 @@
   }
 }
 
-
 .custom-border {
   border-width: 1px;
   border-style: solid;
-  border-color: hsl(var(--border));
+  border-color: #e2e8f0;
 }

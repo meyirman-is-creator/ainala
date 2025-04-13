@@ -8,12 +8,24 @@ interface AuthState {
   isLoading: boolean;
 }
 
+// const initialState: AuthState = {
+//   user: null,
+//   token: null,
+//   isAuthenticated: false,
+//   isLoading: false,
+// };
 const initialState: AuthState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: false,
-};
+    user: {
+      id: "test-user-id",
+      name: "Тестовый Пользователь",
+      email: "test@example.com",
+      role: "admin", // Можно переключать между "user" и "admin" для тестирования разных ролей
+      avatar: "",
+    },
+    token: "mock-token",
+    isAuthenticated: true, // Автоматически считаем, что пользователь авторизован
+    isLoading: false,
+  };
 
 export const authSlice = createSlice({
   name: "auth",

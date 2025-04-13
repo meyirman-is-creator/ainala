@@ -74,14 +74,16 @@ export default function SignUpPage() {
 
   return (
     <div className="container flex items-center justify-center min-h-[calc(100vh-64px)]">
-      <Card className="mx-auto max-w-md w-full">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Регистрация</CardTitle>
-          <CardDescription>
+      <Card className="mx-auto max-w-md w-full border border-gray-200 rounded-lg bg-white shadow-sm">
+        <CardHeader className="space-y-1 p-6">
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            Регистрация
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
             Создайте аккаунт для репортинга городских проблем
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -89,18 +91,20 @@ export default function SignUpPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Имя</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-900">
+                      Имя
+                    </FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input
                           placeholder="Иван Иванов"
                           {...field}
-                          className="pl-10"
+                          className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                         />
                       </FormControl>
                       <FaUser className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     </div>
-                    <FormMessage />
+                    <FormMessage className="text-sm font-medium text-red-500" />
                   </FormItem>
                 )}
               />
@@ -109,18 +113,20 @@ export default function SignUpPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-900">
+                      Email
+                    </FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input
                           placeholder="email@example.com"
                           {...field}
-                          className="pl-10"
+                          className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                         />
                       </FormControl>
                       <FaEnvelope className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     </div>
-                    <FormMessage />
+                    <FormMessage className="text-sm font-medium text-red-500" />
                   </FormItem>
                 )}
               />
@@ -129,22 +135,22 @@ export default function SignUpPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Пароль</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-900">
+                      Пароль
+                    </FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input
                           placeholder="******"
                           type={showPassword ? "text" : "password"}
                           {...field}
-                          className="pl-10"
+                          className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                         />
                       </FormControl>
                       <FaLock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-10 w-10"
+                        className="absolute right-0 top-0 h-10 w-10 rounded-md hover:bg-gray-100"
                         onClick={togglePasswordVisibility}
                       >
                         {showPassword ? (
@@ -154,25 +160,27 @@ export default function SignUpPage() {
                         )}
                       </Button>
                     </div>
-                    <FormMessage />
+                    <FormMessage className="text-sm font-medium text-red-500" />
                   </FormItem>
                 )}
               />
               {error && (
-                <div className="text-sm font-medium text-destructive">
-                  {error}
-                </div>
+                <div className="text-sm font-medium text-red-500">{error}</div>
               )}
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md"
+                disabled={loading}
+              >
                 {loading ? "Регистрация..." : "Зарегистрироваться"}
               </Button>
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 p-6 pt-0">
           <div className="text-sm text-center text-gray-500">
             Уже есть аккаунт?{" "}
-            <Link href="/auth/login" className="underline text-primary">
+            <Link href="/auth/login" className="underline text-blue-500">
               Войти
             </Link>
           </div>

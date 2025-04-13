@@ -158,10 +158,10 @@ export default function IssuesPage() {
   return (
     <div className="container py-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
           Городские проблемы
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-gray-500">
           Список проблем, о которых сообщили жители города
         </p>
       </div>
@@ -171,19 +171,23 @@ export default function IssuesPage() {
           <FaSearch className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Поиск проблем..."
-            className="pl-10"
+            className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <div className="w-full md:w-64">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
               <SelectValue placeholder="Все категории" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
               {categories.map((category) => (
-                <SelectItem key={category.value} value={category.value}>
+                <SelectItem
+                  key={category.value}
+                  value={category.value}
+                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
+                >
                   {category.label}
                 </SelectItem>
               ))}
@@ -193,10 +197,25 @@ export default function IssuesPage() {
       </div>
 
       <Tabs defaultValue="to do" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="to do">К выполнению</TabsTrigger>
-          <TabsTrigger value="progress">В работе</TabsTrigger>
-          <TabsTrigger value="done">Выполнено</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
+          <TabsTrigger
+            value="to do"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-500 data-[state=active]:shadow-sm"
+          >
+            К выполнению
+          </TabsTrigger>
+          <TabsTrigger
+            value="progress"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-500 data-[state=active]:shadow-sm"
+          >
+            В работе
+          </TabsTrigger>
+          <TabsTrigger
+            value="done"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-500 data-[state=active]:shadow-sm"
+          >
+            Выполнено
+          </TabsTrigger>
         </TabsList>
 
         {["to do", "progress", "done"].map((status) => (
@@ -204,24 +223,27 @@ export default function IssuesPage() {
             {paginatedIssues(status).length > 0 ? (
               <>
                 {paginatedIssues(status).map((issue) => (
-                  <Card key={issue.id}>
+                  <Card
+                    key={issue.id}
+                    className="border border-gray-200 rounded-lg bg-white shadow-sm"
+                  >
                     <CardHeader className="p-4">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div>
-                          <CardTitle className="text-xl">
+                          <CardTitle className="text-xl text-gray-900">
                             {issue.title}
                           </CardTitle>
                           <div className="flex flex-wrap gap-2 mt-1">
-                            <Badge variant="outline">
+                            <Badge className="inline-flex items-center rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-semibold">
                               {getCategoryName(issue.category)}
                             </Badge>
                             <Badge
                               className={
                                 issue.status === "done"
-                                  ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                  ? "bg-green-100 text-green-800 hover:bg-green-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
                                   : issue.status === "progress"
-                                  ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                                  : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                                  ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                                  : "bg-gray-100 text-gray-800 hover:bg-gray-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
                               }
                             >
                               {getStatusName(issue.status)}
@@ -229,11 +251,7 @@ export default function IssuesPage() {
                           </div>
                         </div>
                         <Link href={`/issues/${issue.id}`}>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex items-center gap-2"
-                          >
+                          <Button className="h-9 rounded-md px-3 border border-gray-200 bg-white text-gray-900 hover:bg-gray-100 flex items-center gap-2">
                             <FaEye className="h-4 w-4" />
                             Подробнее
                           </Button>
@@ -241,24 +259,22 @@ export default function IssuesPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pt-0">
-                      <CardDescription className="mb-4">
+                      <CardDescription className="mb-4 text-sm text-gray-500">
                         {issue.description.substring(0, 150)}
                         {issue.description.length > 150 && "..."}
                       </CardDescription>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                         <div>
-                          <p className="text-muted-foreground">Создано:</p>
+                          <p className="text-gray-500">Создано:</p>
                           <p>{formatDate(issue.createdAt)}</p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Автор:</p>
+                          <p className="text-gray-500">Автор:</p>
                           <p>{issue.userName}</p>
                         </div>
                         {issue.assignedTo && (
                           <div>
-                            <p className="text-muted-foreground">
-                              Ответственный:
-                            </p>
+                            <p className="text-gray-500">Ответственный:</p>
                             <p>{issue.assignedTo}</p>
                           </div>
                         )}
@@ -268,19 +284,19 @@ export default function IssuesPage() {
                       <div className="flex items-center gap-6">
                         <div className="flex items-center gap-1">
                           <FaThumbsUp className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-gray-500">
                             {issue.likes}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <FaComment className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-gray-500">
                             {issue.comments}
                           </span>
                         </div>
                       </div>
                       {isAuthenticated && (
-                        <Button size="sm" variant="ghost">
+                        <Button className="h-9 rounded-md px-3 bg-transparent hover:bg-gray-100">
                           <FaThumbsUp className="h-4 w-4 mr-2" />
                           Нравится
                         </Button>
@@ -292,8 +308,7 @@ export default function IssuesPage() {
                 {totalPages(status) > 1 && (
                   <div className="flex justify-center gap-2 mt-6">
                     <Button
-                      variant="outline"
-                      size="sm"
+                      className="h-9 rounded-md px-3 border border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
@@ -308,9 +323,11 @@ export default function IssuesPage() {
                       ).map((page) => (
                         <Button
                           key={page}
-                          variant={currentPage === page ? "default" : "outline"}
-                          size="sm"
-                          className="w-8 h-8 p-0"
+                          className={
+                            currentPage === page
+                              ? "h-8 w-8 p-0 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                              : "h-8 w-8 p-0 rounded-md border border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
+                          }
                           onClick={() => setCurrentPage(page)}
                         >
                           {page}
@@ -318,8 +335,7 @@ export default function IssuesPage() {
                       ))}
                     </div>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      className="h-9 rounded-md px-3 border border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
                       onClick={() =>
                         setCurrentPage((prev) =>
                           Math.min(totalPages(status), prev + 1)
@@ -335,17 +351,19 @@ export default function IssuesPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold mb-1">
+                <h3 className="text-xl font-semibold mb-1 text-gray-900">
                   Проблемы не найдены
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-gray-500 mb-6">
                   {searchQuery || selectedCategory !== "all"
                     ? "Попробуйте изменить параметры поиска"
                     : `В разделе "${getStatusName(status)}" пока нет проблем`}
                 </p>
                 {isAuthenticated && (
                   <Link href="/account/add-issue">
-                    <Button>Добавить проблему</Button>
+                    <Button className="h-10 px-4 py-2 bg-blue-500 text-white hover:bg-blue-600">
+                      Добавить проблему
+                    </Button>
                   </Link>
                 )}
               </div>

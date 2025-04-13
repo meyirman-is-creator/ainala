@@ -1,5 +1,4 @@
-// app/page.js
-"use client"
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FaExclamationTriangle, FaUser, FaCheckCircle } from "react-icons/fa";
@@ -7,80 +6,6 @@ import { FaExclamationTriangle, FaUser, FaCheckCircle } from "react-icons/fa";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <style jsx global>{`
-        @import "tailwindcss";
-        
-        @layer base {
-          :root {
-            --background: 0 0% 100%;
-            --foreground: 222.2 84% 4.9%;
-            
-            --card: 0 0% 100%;
-            --card-foreground: 222.2 84% 4.9%;
-            
-            --popover: 0 0% 100%;
-            --popover-foreground: 222.2 84% 4.9%;
-            
-            --primary: 214 97% 52%;
-            --primary-foreground: 210 40% 98%;
-            
-            --secondary: 217 32% 18%;
-            --secondary-foreground: 210 40% 98%;
-            
-            --muted: 210 40% 96.1%;
-            --muted-foreground: 215.4 16.3% 46.9%;
-            
-            --accent: 210 40% 96.1%;
-            --accent-foreground: 222.2 47.4% 11.2%;
-            
-            --destructive: 0 84.2% 60.2%;
-            --destructive-foreground: 210 40% 98%;
-            
-            --border: 214.3 31.8% 91.4%;
-            --input: 214.3 31.8% 91.4%;
-            --ring: 214 97% 52%;
-            
-            --radius: 0.5rem;
-          }
-          
-          .dark {
-            --background: 222.2 84% 4.9%;
-            --foreground: 210 40% 98%;
-            
-            --card: 222.2 84% 4.9%;
-            --card-foreground: 210 40% 98%;
-            
-            --popover: 222.2 84% 4.9%;
-            --popover-foreground: 210 40% 98%;
-            
-            --primary: 214 97% 52%;
-            --primary-foreground: 222.2 47.4% 11.2%;
-            
-            --secondary: 217 32% 18%;
-            --secondary-foreground: 210 40% 98%;
-            
-            --muted: 217.2 32.6% 17.5%;
-            --muted-foreground: 215 20.2% 65.1%;
-            
-            --accent: 217.2 32.6% 17.5%;
-            --accent-foreground: 210 40% 98%;
-            
-            --destructive: 0 62.8% 30.6%;
-            --destructive-foreground: 210 40% 98%;
-            
-            --border: 217.2 32.6% 17.5%;
-            --input: 217.2 32.6% 17.5%;
-            --ring: 212.7 26.8% 83.9%;
-          }
-        }
-        
-        .custom-border {
-          border-width: 1px;
-          border-style: solid;
-          border-color: hsl(var(--border));
-        }
-      `}</style>
-      
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]">
           <div className="container px-4 md:px-6">
@@ -243,7 +168,9 @@ export default function Home() {
                 >
                   <div className="text-4xl mb-3">{cat.icon}</div>
                   <h3 className="text-xl font-bold">{cat.title}</h3>
-                  <p className="mt-2 text-[hsl(var(--muted-foreground))]">{cat.desc}</p>
+                  <p className="mt-2 text-[hsl(var(--muted-foreground))]">
+                    {cat.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -261,12 +188,19 @@ export default function Home() {
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:flex-row justify-center">
                 <Link href="/auth/sign-up">
-                  <Button size="lg" className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]">
+                  <Button
+                    size="lg"
+                    className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+                  >
                     Зарегистрироваться
                   </Button>
                 </Link>
                 <Link href="/auth/login">
-                  <Button size="lg" variant="outline" className="border-[hsl(var(--primary))] text-[hsl(var(--primary))]">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-[hsl(var(--primary))] text-[hsl(var(--primary))]"
+                  >
                     Войти
                   </Button>
                 </Link>

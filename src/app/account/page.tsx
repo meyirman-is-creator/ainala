@@ -25,9 +25,7 @@ export default function AccountPage() {
   const { user } = useAppSelector((state) => state.auth);
   const [date, setDate] = useState<Date>(new Date());
 
-  // Исправленная функция setDate с правильным типом для календаря
   const handleDateChange = useCallback((value: Date | Date[]) => {
-    // Обработка одиночной даты или диапазона дат
     if (value instanceof Date) {
       setDate(value);
     } else if (Array.isArray(value) && value.length > 0) {
@@ -35,7 +33,6 @@ export default function AccountPage() {
     }
   }, []);
 
-  // Имитация данных проблем
   const [issues] = useState([
     {
       id: "1",
@@ -63,7 +60,6 @@ export default function AccountPage() {
     },
   ]);
 
-  // Фильтрация проблем по выбранной дате
   const filteredIssues = issues.filter((issue) => {
     const issueDate = new Date(issue.createdAt);
     return (
@@ -73,7 +69,6 @@ export default function AccountPage() {
     );
   });
 
-  // Статистика по проблемам
   const stats = {
     total: issues.length,
     done: issues.filter((issue) => issue.status === "done").length,
@@ -85,15 +80,15 @@ export default function AccountPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
             Добро пожаловать, {user?.name}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-500">
             Управляйте своими городскими проблемами и отслеживайте их решение
           </p>
         </div>
         <Link href="/account/add-issue">
-          <Button className="flex items-center">
+          <Button className="bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md flex items-center">
             <FaPlusCircle className="mr-2" />
             Добавить проблему
           </Button>
@@ -103,41 +98,51 @@ export default function AccountPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card>
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between p-4">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-gray-900">
                   Всего проблем
                 </CardTitle>
-                <FaChartLine className="h-4 w-4 text-primary" />
+                <FaChartLine className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between p-4">
-                <CardTitle className="text-sm font-medium">Решено</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-900">
+                  Решено
+                </CardTitle>
                 <FaCheckCircle className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <p className="text-2xl font-bold">{stats.done}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.done}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between p-4">
-                <CardTitle className="text-sm font-medium">В работе</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-900">
+                  В работе
+                </CardTitle>
                 <FaClock className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <p className="text-2xl font-bold">{stats.inProgress}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.inProgress}
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Последние проблемы</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Последние проблемы
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
                 Список ваших последних проблем для быстрого доступа
               </CardDescription>
             </CardHeader>
@@ -150,11 +155,13 @@ export default function AccountPage() {
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                     >
                       <div>
-                        <h3 className="font-medium">{issue.title}</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className="font-medium text-gray-900">
+                          {issue.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
                           {issue.description.substring(0, 60)}...
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-gray-500 mt-1">
                           {formatDate(issue.createdAt)}
                         </p>
                       </div>
@@ -180,11 +187,11 @@ export default function AccountPage() {
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-muted-foreground">
-                    У вас пока нет проблем
-                  </p>
+                  <p className="text-gray-500">У вас пока нет проблем</p>
                   <Link href="/account/add-issue">
-                    <Button className="mt-2">Добавить проблему</Button>
+                    <Button className="mt-2 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md">
+                      Добавить проблему
+                    </Button>
                   </Link>
                 </div>
               )}
@@ -193,9 +200,11 @@ export default function AccountPage() {
         </div>
 
         <div className="space-y-6">
-          <Card className="p-4">
+          <Card className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-0 pb-4">
-              <CardTitle>Календарь активности</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Календарь активности
+              </CardTitle>
             </CardHeader>
             <div className="calendar-container">
               <Calendar
@@ -206,9 +215,11 @@ export default function AccountPage() {
             </div>
           </Card>
 
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Проблемы за {formatDate(date)}</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Проблемы за {formatDate(date)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               {filteredIssues.length > 0 ? (
@@ -219,8 +230,10 @@ export default function AccountPage() {
                       className="flex items-center justify-between"
                     >
                       <div>
-                        <h3 className="font-medium">{issue.title}</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className="font-medium text-gray-900">
+                          {issue.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
                           {issue.description.substring(0, 40)}...
                         </p>
                       </div>
@@ -245,7 +258,7 @@ export default function AccountPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-center py-4">
+                <p className="text-gray-500 text-center py-4">
                   Нет проблем за выбранную дату
                 </p>
               )}

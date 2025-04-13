@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -31,47 +31,52 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button className="relative h-8 w-8 rounded-full bg-transparent hover:bg-gray-100">
+          <Avatar className="h-8 w-8 relative flex shrink-0 overflow-hidden rounded-full">
             <AvatarImage src={user?.avatar} alt={user?.name} />
-            <AvatarFallback className="bg-primary text-white">
+            <AvatarFallback className="bg-blue-500 text-white flex h-full w-full items-center justify-center">
               {user?.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent
+        className="w-56 z-50 min-w-[8rem] rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md"
+        align="end"
+        forceMount
+      >
+        <DropdownMenuLabel className="font-normal px-2 py-1.5">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
-            </p>
+            <p className="text-xs leading-none text-gray-500">{user?.email}</p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="h-px bg-gray-200 my-1" />
         <DropdownMenuGroup>
           <Link href="/account">
-            <DropdownMenuItem>
+            <DropdownMenuItem className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-gray-100">
               <FaUser className="mr-2 h-4 w-4" />
               <span>Профиль</span>
             </DropdownMenuItem>
           </Link>
           <Link href="/account/issues">
-            <DropdownMenuItem>
+            <DropdownMenuItem className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-gray-100">
               <FaClipboardList className="mr-2 h-4 w-4" />
               <span>Мои проблемы</span>
             </DropdownMenuItem>
           </Link>
           <Link href="/account/add-issue">
-            <DropdownMenuItem>
+            <DropdownMenuItem className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-gray-100">
               <FaPlusCircle className="mr-2 h-4 w-4" />
               <span>Добавить проблему</span>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuSeparator className="h-px bg-gray-200 my-1" />
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-gray-100"
+        >
           <FaSignOutAlt className="mr-2 h-4 w-4" />
           <span>Выход</span>
         </DropdownMenuItem>

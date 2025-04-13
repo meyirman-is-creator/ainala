@@ -25,18 +25,18 @@ export default function VerifyEmailPage() {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const router = useRouter();
-  
+
   const handleComplete = async (value: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Имитация запроса к API
       // В реальном приложении здесь был бы запрос к бэкенду
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // Перенаправление на страницу входа
       router.push("/auth/login");
     } catch (err) {
@@ -45,11 +45,11 @@ export default function VerifyEmailPage() {
       setLoading(false);
     }
   };
-  
+
   const handleResendCode = async () => {
     setResending(true);
     setError(null);
-    
+
     try {
       // Имитация запроса к API
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -59,21 +59,21 @@ export default function VerifyEmailPage() {
       setResending(false);
     }
   };
-  
+
   return (
     <div className="container flex items-center justify-center min-h-[calc(100vh-64px)]">
-      <Card className="mx-auto max-w-md w-full">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">
+      <Card className="mx-auto max-w-md w-full border border-gray-200 rounded-lg bg-white shadow-sm">
+        <CardHeader className="space-y-1 p-6">
+          <CardTitle className="text-2xl font-bold text-gray-900">
             Подтверждение email
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm text-gray-500">
             Мы отправили 6-значный код подтверждения на ваш email
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-6">
           <div className="flex justify-center py-4">
-            <FaEnvelope className="h-12 w-12 text-primary" />
+            <FaEnvelope className="h-12 w-12 text-blue-500" />
           </div>
           <div className="flex justify-center">
             <InputOTP
@@ -84,28 +84,45 @@ export default function VerifyEmailPage() {
               disabled={loading}
             >
               <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
+                <InputOTPSlot
+                  index={0}
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                />
+                <InputOTPSlot
+                  index={1}
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                />
+                <InputOTPSlot
+                  index={2}
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                />
               </InputOTPGroup>
               <InputOTPSeparator />
               <InputOTPGroup>
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+                <InputOTPSlot
+                  index={3}
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                />
+                <InputOTPSlot
+                  index={4}
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                />
+                <InputOTPSlot
+                  index={5}
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                />
               </InputOTPGroup>
             </InputOTP>
           </div>
           {error && (
-            <div className="text-sm font-medium text-destructive text-center">
+            <div className="text-sm font-medium text-red-500 text-center">
               {error}
             </div>
           )}
           <div className="text-sm text-center text-gray-500">
             Не получили код?{" "}
             <Button
-              variant="link"
-              className="p-0 h-auto text-primary"
+              className="p-0 h-auto text-blue-500 bg-transparent hover:bg-transparent hover:underline"
               onClick={handleResendCode}
               disabled={resending}
             >
@@ -113,9 +130,9 @@ export default function VerifyEmailPage() {
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 p-6 pt-0">
           <Link href="/auth/login" className="w-full">
-            <Button variant="outline" className="w-full">
+            <Button className="w-full border border-gray-200 bg-white text-gray-900 hover:bg-gray-100 h-10 px-4 py-2 rounded-md">
               Вернуться к входу
             </Button>
           </Link>

@@ -107,33 +107,39 @@ export default function IssueDetailsPage() {
         <div>
           <Link
             href="/issues"
-            className="text-sm text-primary hover:underline mb-2 inline-block"
+            className="text-sm text-blue-500 hover:underline mb-2 inline-block"
           >
             &larr; Назад к списку проблем
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight">{issue.title}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            {issue.title}
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           <Badge
             className={
               issue.status === "done"
-                ? "bg-green-100 text-green-800 hover:bg-green-100"
+                ? "bg-green-100 text-green-800 hover:bg-green-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
                 : issue.status === "progress"
-                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                : "bg-gray-100 text-gray-800 hover:bg-gray-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
             }
           >
             {getStatusName(issue.status)}
           </Badge>
-          <Badge variant="outline">{getCategoryName(issue.category)}</Badge>
+          <Badge className="inline-flex items-center rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-semibold">
+            {getCategoryName(issue.category)}
+          </Badge>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Описание проблемы</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Описание проблемы
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <p className="whitespace-pre-line">{issue.description}</p>
@@ -142,28 +148,28 @@ export default function IssueDetailsPage() {
                 <div className="flex items-center gap-2">
                   <FaCalendarAlt className="text-gray-400" />
                   <div>
-                    <p className="text-muted-foreground">Создано:</p>
+                    <p className="text-gray-500">Создано:</p>
                     <p>{formatDate(issue.createdAt)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaUser className="text-gray-400" />
                   <div>
-                    <p className="text-muted-foreground">Автор:</p>
+                    <p className="text-gray-500">Автор:</p>
                     <p>{issue.userName}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaMapMarkerAlt className="text-gray-400" />
                   <div>
-                    <p className="text-muted-foreground">Местоположение:</p>
+                    <p className="text-gray-500">Местоположение:</p>
                     <p>{issue.location}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaTags className="text-gray-400" />
                   <div>
-                    <p className="text-muted-foreground">Категория:</p>
+                    <p className="text-gray-500">Категория:</p>
                     <p>{getCategoryName(issue.category)}</p>
                   </div>
                 </div>
@@ -171,7 +177,7 @@ export default function IssueDetailsPage() {
                   <div className="flex items-center gap-2">
                     <FaClock className="text-gray-400" />
                     <div>
-                      <p className="text-muted-foreground">Дедлайн:</p>
+                      <p className="text-gray-500">Дедлайн:</p>
                       <p>{formatDate(issue.deadline)}</p>
                     </div>
                   </div>
@@ -180,7 +186,7 @@ export default function IssueDetailsPage() {
                   <div className="flex items-center gap-2">
                     <FaUser className="text-gray-400" />
                     <div>
-                      <p className="text-muted-foreground">Ответственный:</p>
+                      <p className="text-gray-500">Ответственный:</p>
                       <p>{issue.assignedTo}</p>
                     </div>
                   </div>
@@ -190,9 +196,9 @@ export default function IssueDetailsPage() {
             <CardFooter className="p-4 pt-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className={liked ? "text-primary" : ""}
+                  className={`h-9 rounded-md px-3 bg-transparent hover:bg-gray-100 ${
+                    liked ? "text-blue-500" : ""
+                  }`}
                   onClick={handleLike}
                   disabled={!isAuthenticated}
                 >
@@ -200,22 +206,24 @@ export default function IssueDetailsPage() {
                   {issue.likes + (liked ? 1 : 0)}
                 </Button>
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-gray-500">
                 Последнее обновление: {formatDate(issue.updatedAt)}
               </div>
             </CardFooter>
           </Card>
 
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Фотографии проблемы</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Фотографии проблемы
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {issue.photos.map((photo, index) => (
                   <div
                     key={index}
-                    className="relative aspect-video rounded-md overflow-hidden border"
+                    className="relative aspect-video rounded-md overflow-hidden border border-gray-200"
                   >
                     <Image
                       src={photo}
@@ -232,11 +240,13 @@ export default function IssueDetailsPage() {
           {issue.status === "done" &&
             issue.resultPhotos &&
             issue.resultPhotos.length > 0 && (
-              <Card>
+              <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
                 <CardHeader className="p-4">
-                  <CardTitle>Результат решения</CardTitle>
+                  <CardTitle className="text-2xl font-semibold text-gray-900">
+                    Результат решения
+                  </CardTitle>
                   {issue.adminComment && (
-                    <CardDescription className="whitespace-pre-line">
+                    <CardDescription className="whitespace-pre-line text-sm text-gray-500">
                       {issue.adminComment}
                     </CardDescription>
                   )}
@@ -246,7 +256,7 @@ export default function IssueDetailsPage() {
                     {issue.resultPhotos.map((photo, index) => (
                       <div
                         key={index}
-                        className="relative aspect-video rounded-md overflow-hidden border"
+                        className="relative aspect-video rounded-md overflow-hidden border border-gray-200"
                       >
                         <Image
                           src={photo}
@@ -261,9 +271,11 @@ export default function IssueDetailsPage() {
               </Card>
             )}
 
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Комментарии ({issue.comments.length})</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Комментарии ({issue.comments.length})
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               {issue.comments.length > 0 ? (
@@ -288,7 +300,7 @@ export default function IssueDetailsPage() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div className="font-medium">{comment.userName}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-gray-500">
                             {formatDate(comment.createdAt)}
                           </div>
                         </div>
@@ -298,21 +310,25 @@ export default function IssueDetailsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-4">
+                <p className="text-center text-gray-500 py-4">
                   Пока нет комментариев
                 </p>
               )}
               {isAuthenticated && (
                 <>
-                  <Separator className="my-4" />
+                  <Separator className="h-px bg-gray-200 my-4" />
                   <form onSubmit={handleCommentSubmit}>
                     <Textarea
                       placeholder="Напишите комментарий..."
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      className="mb-2"
+                      className="mb-2 min-h-[80px] w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                     />
-                    <Button type="submit" disabled={!comment.trim()}>
+                    <Button
+                      type="submit"
+                      disabled={!comment.trim()}
+                      className="h-10 px-4 py-2 bg-blue-500 text-white hover:bg-blue-600"
+                    >
                       Отправить комментарий
                     </Button>
                   </form>
@@ -323,9 +339,11 @@ export default function IssueDetailsPage() {
         </div>
 
         <div className="space-y-6">
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Прогресс решения</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Прогресс решения
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="space-y-4">
@@ -335,7 +353,7 @@ export default function IssueDetailsPage() {
                   </div>
                   <div className="flex-1">
                     <div className="font-medium">Проблема создана</div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500">
                       {formatDate(issue.createdAt)}
                     </p>
                   </div>
@@ -353,12 +371,12 @@ export default function IssueDetailsPage() {
                   <div className="flex-1">
                     <div className="font-medium">Принята в работу</div>
                     {issue.status !== "to do" ? (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-500">
                         {issue.assignedTo &&
                           `Ответственный: ${issue.assignedTo}`}
                       </p>
                     ) : (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-500">
                         Ожидает рассмотрения
                       </p>
                     )}
@@ -377,13 +395,11 @@ export default function IssueDetailsPage() {
                   <div className="flex-1">
                     <div className="font-medium">Проблема решена</div>
                     {issue.status === "done" ? (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-500">
                         {formatDate(issue.updatedAt)}
                       </p>
                     ) : (
-                      <p className="text-sm text-muted-foreground">
-                        В процессе
-                      </p>
+                      <p className="text-sm text-gray-500">В процессе</p>
                     )}
                   </div>
                 </div>
@@ -391,9 +407,11 @@ export default function IssueDetailsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border border-gray-200 rounded-lg bg-white shadow-sm">
             <CardHeader className="p-4">
-              <CardTitle>Похожие проблемы</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-gray-900">
+                Похожие проблемы
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="space-y-3">
@@ -402,27 +420,21 @@ export default function IssueDetailsPage() {
                   className="block hover:bg-gray-50 p-2 rounded-md"
                 >
                   <p className="font-medium">Неработающий фонарь</p>
-                  <p className="text-sm text-muted-foreground">
-                    Категория: Освещение
-                  </p>
+                  <p className="text-sm text-gray-500">Категория: Освещение</p>
                 </Link>
                 <Link
                   href={`/issues/3`}
                   className="block hover:bg-gray-50 p-2 rounded-md"
                 >
                   <p className="font-medium">Сломанная скамейка</p>
-                  <p className="text-sm text-muted-foreground">
-                    Категория: Парки
-                  </p>
+                  <p className="text-sm text-gray-500">Категория: Парки</p>
                 </Link>
                 <Link
                   href={`/issues/4`}
                   className="block hover:bg-gray-50 p-2 rounded-md"
                 >
                   <p className="font-medium">Мусор вдоль дороги</p>
-                  <p className="text-sm text-muted-foreground">
-                    Категория: Чистота
-                  </p>
+                  <p className="text-sm text-gray-500">Категория: Чистота</p>
                 </Link>
               </div>
             </CardContent>
