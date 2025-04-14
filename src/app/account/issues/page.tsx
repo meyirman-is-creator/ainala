@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   FaEdit,
   FaEye,
@@ -43,6 +44,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function IssuesPage() {
   const { user } = useAppSelector((state) => state.auth);
@@ -52,6 +63,13 @@ export default function IssuesPage() {
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<any>(null);
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [issueToDelete, setIssueToDelete] = useState<any>(null);
+  const [issueToReject, setIssueToReject] = useState<any>(null);
+  const [issueToView, setIssueToView] = useState<any>(null);
 
   // Accept Modal State
   const [responsiblePerson, setResponsiblePerson] = useState("Tender");
@@ -79,6 +97,8 @@ export default function IssuesPage() {
       assignedTo: "Дорожная служба",
       importance: "high",
       adminComment: "Проблема решена, яма заделана",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
     },
     {
       id: "2",
@@ -91,6 +111,8 @@ export default function IssuesPage() {
       deadline: new Date(2023, 5, 1).toISOString(),
       assignedTo: "Служба освещения",
       importance: "medium",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
     },
     {
       id: "3",
@@ -100,6 +122,8 @@ export default function IssuesPage() {
       category: "parks",
       createdAt: new Date(2023, 4, 25).toISOString(),
       userName: "Иван Иванов",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
     },
   ]);
 
@@ -133,7 +157,6 @@ export default function IssuesPage() {
   };
 
   const handleAcceptSubmit = () => {
-    // In a real app, we would make an API call to update the issue
     console.log("Accepting issue:", {
       issueId: selectedIssue?.id,
       responsiblePerson,
@@ -146,7 +169,6 @@ export default function IssuesPage() {
   };
 
   const handleCompleteSubmit = () => {
-    // In a real app, we would make an API call to update the issue
     console.log("Completing issue:", {
       issueId: selectedIssue?.id,
       comment: completeComment,
@@ -160,7 +182,6 @@ export default function IssuesPage() {
       const fileArray = Array.from(files);
       setResultPhotos(fileArray);
 
-      // Create preview URLs
       const newPreviewUrls = fileArray.map((file) => URL.createObjectURL(file));
       setResultPreviewUrls(newPreviewUrls);
     }
@@ -282,15 +303,17 @@ export default function IssuesPage() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Link href={`/issues/${issue.id}`}>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-10 w-10 rounded-md hover:bg-blue-50 hover:text-blue-600"
-                            >
-                              <FaEye className="h-4 w-4" />
-                            </Button>
-                          </Link>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-10 w-10 rounded-md hover:bg-blue-50 hover:text-blue-600"
+                            onClick={() => {
+                              setIssueToView(issue);
+                              setViewModalOpen(true);
+                            }}
+                          >
+                            <FaEye className="h-4 w-4" />
+                          </Button>
                           {!isAdmin && issue.status === "to do" && (
                             <Link href={`/account/add-issue?id=${issue.id}`}>
                               <Button
@@ -307,6 +330,10 @@ export default function IssuesPage() {
                               size="icon"
                               variant="ghost"
                               className="text-red-500 h-10 w-10 rounded-md hover:bg-red-50"
+                              onClick={() => {
+                                setIssueToDelete(issue);
+                                setDeleteModalOpen(true);
+                              }}
                             >
                               <FaTrash className="h-4 w-4" />
                             </Button>
@@ -368,6 +395,10 @@ export default function IssuesPage() {
                           <Button
                             size="sm"
                             className="bg-red-500 text-white hover:bg-red-600 h-9 rounded-md px-3"
+                            onClick={() => {
+                              setIssueToReject(issue);
+                              setRejectModalOpen(true);
+                            }}
                           >
                             Отклонить
                           </Button>
@@ -551,7 +582,6 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Complete Issue Modal */}
       <Dialog open={isCompleteModalOpen} onOpenChange={setIsCompleteModalOpen}>
         <DialogContent className="sm:max-w-md lg:max-w-lg p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
@@ -692,6 +722,173 @@ export default function IssuesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <DialogContent className="sm:max-w-4xl p-0 rounded-lg overflow-hidden shadow-lg">
+          <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {issueToView?.title}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="p-6 overflow-y-auto max-h-[80vh]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">Описание</h3>
+                  <p className="text-gray-700">{issueToView?.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <p className="text-gray-500">Создано:</p>
+                    <p className="font-medium">
+                      {issueToView && formatDate(issueToView.createdAt)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Категория:</p>
+                    <p className="font-medium">
+                      {issueToView && getCategoryName(issueToView.category)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Статус:</p>
+                    <p className="font-medium">
+                      {issueToView && getStatusName(issueToView.status)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Автор:</p>
+                    <p className="font-medium">{issueToView?.userName}</p>
+                  </div>
+                  {issueToView?.assignedTo && (
+                    <div>
+                      <p className="text-gray-500">Ответственный:</p>
+                      <p className="font-medium">{issueToView.assignedTo}</p>
+                    </div>
+                  )}
+                  {issueToView?.deadline && (
+                    <div>
+                      <p className="text-gray-500">Дедлайн:</p>
+                      <p className="font-medium">
+                        {formatDate(issueToView.deadline)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {issueToView?.adminComment && (
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Комментарий администратора
+                    </h3>
+                    <div className="p-3 bg-gray-50 rounded-md">
+                      <p>{issueToView.adminComment}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Фотографии</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="relative aspect-video rounded-md overflow-hidden border border-gray-200 shadow-sm">
+                    <Image
+                      src="https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442"
+                      alt="Фотография проблемы"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  </div>
+                  {issueToView?.status === "done" && (
+                    <>
+                      <h3 className="text-lg font-semibold mb-2">
+                        Результат решения
+                      </h3>
+                      <div className="relative aspect-video rounded-md overflow-hidden border border-gray-200 shadow-sm">
+                        <Image
+                          src="https://auto-dor.com.ua/wp-content/uploads/2019/11/remont-dorog.jpg"
+                          alt="Результат решения проблемы"
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="p-6 bg-gray-50 border-t flex justify-end">
+            <Button
+              onClick={() => setViewModalOpen(false)}
+              className="border border-gray-200 !bg-blue"
+            >
+              Закрыть
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Вы уверены, что хотите удалить?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Это действие нельзя отменить. Проблема "{issueToDelete?.title}"
+              будет навсегда удалена из системы.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 text-white hover:bg-red-600"
+              onClick={() => {
+                console.log("Удаление проблемы:", issueToDelete?.id);
+                setDeleteModalOpen(false);
+              }}
+            >
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Отклонить проблему?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы собираетесь отклонить проблему "{issueToReject?.title}".
+              Пожалуйста, убедитесь, что указали причину отказа.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mb-4">
+            <Label htmlFor="reject-reason">Причина отклонения</Label>
+            <Textarea
+              id="reject-reason"
+              placeholder="Укажите причину отклонения проблемы"
+              className="mt-2"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 text-white hover:bg-red-600"
+              onClick={() => {
+                console.log("Отклонение проблемы:", issueToReject?.id);
+                setRejectModalOpen(false);
+              }}
+            >
+              Отклонить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

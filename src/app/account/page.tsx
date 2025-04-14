@@ -228,47 +228,15 @@ export default function AccountPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="text-center mb-2">
-                <h3 className="text-lg font-medium">April 2025</h3>
-              </div>
-              <div className="grid grid-cols-7 gap-1 mb-2 text-center">
-                <div className="text-sm font-medium">Su</div>
-                <div className="text-sm font-medium">Mo</div>
-                <div className="text-sm font-medium">Tu</div>
-                <div className="text-sm font-medium">We</div>
-                <div className="text-sm font-medium">Th</div>
-                <div className="text-sm font-medium">Fr</div>
-                <div className="text-sm font-medium">Sa</div>
-              </div>
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {Array.from({ length: 30 }, (_, i) => {
-                  const day = i + 1;
-                  const hasIssue = hasIssueOnDate(new Date(2025, 3, day));
-                  const isSelected =
-                    date && date.getDate() === day && date.getMonth() === 3;
-                  const isToday = day === 14; // April 14 is "today"
-
-                  return (
-                    <button
-                      key={day}
-                      onClick={() => setDate(new Date(2025, 3, day))}
-                      className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
-                        isToday
-                          ? "bg-blue-100 text-blue-600 font-bold"
-                          : isSelected
-                          ? "bg-blue-500 text-white"
-                          : hasIssue
-                          ? "bg-blue-50 text-blue-600 font-medium"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between mt-4">
-                <button className="p-1 rounded-full hover:bg-gray-100">
+              <div className="flex justify-between items-center mb-4">
+                <button
+                  className="p-1 rounded-full hover:bg-gray-100"
+                  onClick={() => {
+                    const newDate = new Date(date || new Date());
+                    newDate.setMonth(newDate.getMonth() - 1);
+                    setDate(newDate);
+                  }}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -284,7 +252,24 @@ export default function AccountPage() {
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 </button>
-                <button className="p-1 rounded-full hover:bg-gray-100">
+
+                <h3 className="text-lg font-medium">
+                  {date
+                    ? new Intl.DateTimeFormat("ru-RU", {
+                        month: "long",
+                        year: "numeric",
+                      }).format(date)
+                    : "Выберите дату"}
+                </h3>
+
+                <button
+                  className="p-1 rounded-full hover:bg-gray-100"
+                  onClick={() => {
+                    const newDate = new Date(date || new Date());
+                    newDate.setMonth(newDate.getMonth() + 1);
+                    setDate(newDate);
+                  }}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -300,6 +285,79 @@ export default function AccountPage() {
                     <path d="M9 18l6-6-6-6" />
                   </svg>
                 </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                <div className="text-sm font-medium">Вс</div>
+                <div className="text-sm font-medium">Пн</div>
+                <div className="text-sm font-medium">Вт</div>
+                <div className="text-sm font-medium">Ср</div>
+                <div className="text-sm font-medium">Чт</div>
+                <div className="text-sm font-medium">Пт</div>
+                <div className="text-sm font-medium">Сб</div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center">
+                {(() => {
+                  const currentDate = date || new Date();
+                  const year = currentDate.getFullYear();
+                  const month = currentDate.getMonth();
+
+                  // First day of the month
+                  const firstDay = new Date(year, month, 1);
+                  // Last day of the month
+                  const lastDay = new Date(year, month + 1, 0);
+
+                  // Get the day of the week for the first day (0 = Sunday, 1 = Monday, etc.)
+                  const firstDayIndex = firstDay.getDay();
+
+                  // Total days in the month
+                  const daysInMonth = lastDay.getDate();
+
+                  // Create an array to hold all calendar days
+                  const days = [];
+
+                  // Add empty cells for days before the first day of the month
+                  for (let i = 0; i < firstDayIndex; i++) {
+                    days.push(
+                      <div key={`empty-${i}`} className="h-8 w-8 mx-auto"></div>
+                    );
+                  }
+
+                  // Add days of the month
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDate = new Date(year, month, day);
+                    const hasIssue = hasIssueOnDate(dayDate);
+                    const isSelected =
+                      date &&
+                      date.getDate() === day &&
+                      date.getMonth() === month;
+                    const isToday =
+                      new Date().getDate() === day &&
+                      new Date().getMonth() === month &&
+                      new Date().getFullYear() === year;
+
+                    days.push(
+                      <button
+                        key={day}
+                        onClick={() => setDate(new Date(year, month, day))}
+                        className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
+                          isToday
+                            ? "bg-blue-100 text-blue-600 font-bold"
+                            : isSelected
+                            ? "bg-blue-500 text-white"
+                            : hasIssue
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    );
+                  }
+
+                  return days;
+                })()}
               </div>
             </CardContent>
           </Card>
