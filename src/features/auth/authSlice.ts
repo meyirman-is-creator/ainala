@@ -19,7 +19,7 @@ const initialState: AuthState = {
       id: "test-user-id",
       name: "Тестовый Пользователь",
       email: "test@example.com",
-      role: "admin", // Можно переключать между "user" и "admin" для тестирования разных ролей
+      role: "user", // Можно переключать между "user" и "admin" для тестирования разных ролей
       avatar: "",
     },
     token: "mock-token",

@@ -195,7 +195,7 @@ export default function IssuesPage() {
   };
 
   return (
-    <div className="bg-gray-50 py-6 min-h-screen">
+    <div className="bg-gray-50 py-6 ">
       <div className="container max-w-[1200px] px-[15px] mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>

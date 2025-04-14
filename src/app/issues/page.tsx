@@ -1,7 +1,9 @@
+// src/app/issues/page.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image"; // Added for image support
 import {
   FaSearch,
   FaThumbsUp,
@@ -50,6 +52,10 @@ export default function IssuesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // State for liked issues
+  const [likedIssues, setLikedIssues] = useState<Record<string, boolean>>({});
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+
   // Имитация данных проблем
   const [issues] = useState([
     {
@@ -63,6 +69,8 @@ export default function IssuesPage() {
       likes: 15,
       comments: 8,
       assignedTo: "Дорожная служба",
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
     {
       id: "2",
@@ -75,6 +83,8 @@ export default function IssuesPage() {
       likes: 8,
       comments: 3,
       assignedTo: "Служба освещения",
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
     {
       id: "3",
@@ -86,6 +96,8 @@ export default function IssuesPage() {
       userName: "Мария Сидорова",
       likes: 12,
       comments: 5,
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
     {
       id: "4",
@@ -98,6 +110,8 @@ export default function IssuesPage() {
       likes: 10,
       comments: 7,
       assignedTo: "Служба уборки",
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
     {
       id: "5",
@@ -110,6 +124,8 @@ export default function IssuesPage() {
       likes: 18,
       comments: 9,
       assignedTo: "Дорожная служба",
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
     {
       id: "6",
@@ -121,6 +137,8 @@ export default function IssuesPage() {
       userName: "Сергей Кузнецов",
       likes: 20,
       comments: 12,
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
     {
       id: "7",
@@ -133,8 +151,19 @@ export default function IssuesPage() {
       likes: 6,
       comments: 4,
       assignedTo: "Транспортная служба",
+      photo:
+        "https://www.infpol.ru/upload/resize_cache/iblock/a7e/800_8000_1/a7e270408c44b2d442b7fe7570cc97be.jpg",
     },
   ]);
+
+  // Initialize like counts
+  useState(() => {
+    const initialLikeCounts: Record<string, number> = {};
+    issues.forEach((issue) => {
+      initialLikeCounts[issue.id] = issue.likes;
+    });
+    setLikeCounts(initialLikeCounts);
+  });
 
   const filteredIssues = (status: string) => {
     return issues
@@ -159,6 +188,20 @@ export default function IssuesPage() {
 
   const totalPages = (status: string) => {
     return Math.ceil(filteredIssues(status).length / itemsPerPage);
+  };
+
+  const handleLike = (issueId: string) => {
+    if (!isAuthenticated) return;
+
+    setLikedIssues((prev) => ({
+      ...prev,
+      [issueId]: !prev[issueId],
+    }));
+
+    setLikeCounts((prev) => ({
+      ...prev,
+      [issueId]: prev[issueId] + (likedIssues[issueId] ? -1 : 1),
+    }));
   };
 
   return (
@@ -240,88 +283,118 @@ export default function IssuesPage() {
                       key={issue.id}
                       className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow transition-shadow"
                     >
-                      <CardHeader className="p-3 sm:p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                          <div>
-                            <CardTitle className="text-base sm:text-lg md:text-xl text-gray-900 line-clamp-2">
-                              {issue.title}
-                            </CardTitle>
-                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1.5">
-                              <Badge className="inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-xs font-semibold">
-                                {getCategoryName(issue.category)}
-                              </Badge>
-                              <Badge
-                                className={
-                                  issue.status === "done"
-                                    ? "bg-green-100 text-green-800 hover:bg-green-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-                                    : issue.status === "progress"
-                                    ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-                                    : "bg-gray-100 text-gray-800 hover:bg-gray-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-                                }
+                      <div className="flex flex-col md:flex-row">
+                        {/* Added photo column */}
+                        <div className="w-full md:w-1/3 relative min-h-[160px]">
+                          <Image
+                            src={issue.photo}
+                            alt={issue.title}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
+                        </div>
+
+                        <div className="w-full md:w-2/3">
+                          <CardHeader className="p-3 sm:p-4">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                              <div>
+                                <CardTitle className="text-base sm:text-lg md:text-xl text-gray-900 line-clamp-2">
+                                  {issue.title}
+                                </CardTitle>
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1.5">
+                                  <Badge className="inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-xs font-semibold">
+                                    {getCategoryName(issue.category)}
+                                  </Badge>
+                                  <Badge
+                                    className={
+                                      issue.status === "done"
+                                        ? "bg-green-100 text-green-800 hover:bg-green-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                                        : issue.status === "progress"
+                                        ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                                        : "bg-gray-100 text-gray-800 hover:bg-gray-100 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                                    }
+                                  >
+                                    {getStatusName(issue.status)}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Link
+                                href={`/issues/${issue.id}`}
+                                className="w-full sm:w-auto mt-2 sm:mt-0"
                               >
-                                {getStatusName(issue.status)}
-                              </Badge>
+                                <Button className="w-full sm:w-auto h-8 sm:h-9 rounded-md px-2 sm:px-3 border border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 flex items-center justify-center gap-1.5">
+                                  <FaEye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                  <span className="text-xs sm:text-sm">
+                                    Подробнее
+                                  </span>
+                                </Button>
+                              </Link>
                             </div>
-                          </div>
-                          <Link
-                            href={`/issues/${issue.id}`}
-                            className="w-full sm:w-auto mt-2 sm:mt-0"
-                          >
-                            <Button className="w-full sm:w-auto h-8 sm:h-9 rounded-md px-2 sm:px-3 border border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 flex items-center justify-center gap-1.5">
-                              <FaEye className="h-3 w-3 sm:h-4 sm:w-4" />
-                              <span className="text-xs sm:text-sm">
-                                Подробнее
-                              </span>
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="px-3 sm:px-4 py-0">
-                        <CardDescription className="mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500 line-clamp-2">
-                          {issue.description.substring(0, 150)}
-                          {issue.description.length > 150 && "..."}
-                        </CardDescription>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
-                          <div>
-                            <p className="text-gray-500">Создано:</p>
-                            <p className="font-medium">
-                              {formatDate(issue.createdAt)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500">Автор:</p>
-                            <p className="font-medium">{issue.userName}</p>
-                          </div>
-                          {issue.assignedTo && (
-                            <div>
-                              <p className="text-gray-500">Ответственный:</p>
-                              <p className="font-medium">{issue.assignedTo}</p>
+                          </CardHeader>
+                          <CardContent className="px-3 sm:px-4 py-0">
+                            <CardDescription className="mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500 line-clamp-2">
+                              {issue.description.substring(0, 150)}
+                              {issue.description.length > 150 && "..."}
+                            </CardDescription>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
+                              <div>
+                                <p className="text-gray-500">Создано:</p>
+                                <p className="font-medium">
+                                  {formatDate(issue.createdAt)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Автор:</p>
+                                <p className="font-medium">{issue.userName}</p>
+                              </div>
+                              {issue.assignedTo && (
+                                <div>
+                                  <p className="text-gray-500">
+                                    Ответственный:
+                                  </p>
+                                  <p className="font-medium">
+                                    {issue.assignedTo}
+                                  </p>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </CardContent>
+                          <CardFooter className="px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-gray-100 mt-3">
+                            <div className="flex items-center gap-4 sm:gap-6">
+                              <div className="flex items-center gap-1.5">
+                                <FaThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                                <span className="text-xs sm:text-sm text-gray-700 font-medium">
+                                  {likeCounts[issue.id] || issue.likes}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <FaComment className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                                <span className="text-xs sm:text-sm text-gray-700 font-medium">
+                                  {issue.comments}
+                                </span>
+                              </div>
+                            </div>
+                            {isAuthenticated && (
+                              <Button
+                                className={`w-full sm:w-auto h-8 rounded-md px-3 ${
+                                  likedIssues[issue.id]
+                                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                                    : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
+                                }`}
+                                onClick={() => handleLike(issue.id)}
+                              >
+                                <FaThumbsUp className="h-3 w-3 mr-1.5" />
+                                <span className="text-xs">
+                                  {likedIssues[issue.id]
+                                    ? "Нравится"
+                                    : "Нравится"}
+                                </span>
+                              </Button>
+                            )}
+                          </CardFooter>
                         </div>
-                      </CardContent>
-                      <CardFooter className="px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-gray-100 mt-3">
-                        <div className="flex items-center gap-4 sm:gap-6">
-                          <div className="flex items-center gap-1.5">
-                            <FaThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-                            <span className="text-xs sm:text-sm text-gray-700 font-medium">
-                              {issue.likes}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <FaComment className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-                            <span className="text-xs sm:text-sm text-gray-700 font-medium">
-                              {issue.comments}
-                            </span>
-                          </div>
-                        </div>
-                        {isAuthenticated && (
-                          <Button className="w-full sm:w-auto h-8 rounded-md px-3 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
-                            <FaThumbsUp className="h-3 w-3 mr-1.5" />
-                            <span className="text-xs">Нравится</span>
-                          </Button>
-                        )}
-                      </CardFooter>
+                      </div>
                     </Card>
                   ))}
 

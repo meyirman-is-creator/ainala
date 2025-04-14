@@ -47,12 +47,12 @@ export function UserNav({ onMenuOpen }: UserNavProps) {
         className="relative h-8 w-8 rounded-full bg-transparent hover:bg-gray-100"
         onClick={handleClick}
       >
-        <Avatar className="h-8 w-8 relative flex shrink-0 overflow-hidden rounded-full">
+        {isMobile && <Avatar className="h-8 w-8 relative flex shrink-0 overflow-hidden rounded-full">
           <AvatarImage src={user?.avatar} alt={user?.name} />
           <AvatarFallback className="bg-blue-500 text-white flex h-full w-full items-center justify-center">
             {user?.name?.charAt(0)?.toUpperCase()}
           </AvatarFallback>
-        </Avatar>
+        </Avatar>}
       </Button>
 
       {/* Only show dropdown on larger screens */}

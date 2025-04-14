@@ -129,7 +129,7 @@ export default function AddIssuePage() {
   };
 
   return (
-    <div className="bg-gray-50 py-6 min-h-screen">
+    <div className="bg-gray-50 py-6">
       <div className="container max-w-[1200px] px-[15px] mx-auto space-y-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">

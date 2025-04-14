@@ -60,86 +60,7 @@ export const Header = () => {
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <UserNav onMenuOpen={() => setIsOpen(true)} />
-                <SheetContent side="left" className="w-64 md:hidden">
-                  <SheetHeader>
-                    <SheetTitle className="text-xl font-bold text-blue-500">
-                      ainala
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6 flex flex-col gap-3">
-                    <Link
-                      href="/"
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                        isActive("/") &&
-                        pathname !== "/issues" &&
-                        !pathname.startsWith("/account")
-                          ? "bg-blue-50 text-blue-500"
-                          : ""
-                      }`}
-                    >
-                      <FaHome className="mr-2 h-4 w-4" />
-                      Главная
-                    </Link>
-                    <Link
-                      href="/issues"
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                        isActive("/issues") ? "bg-blue-50 text-blue-500" : ""
-                      }`}
-                    >
-                      Проблемы
-                    </Link>
-                    <Link
-                      href="/account"
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                        isActive("/account") ? "bg-blue-50 text-blue-500" : ""
-                      }`}
-                    >
-                      Личный кабинет
-                    </Link>
-                    <Link
-                      href="/account/profile"
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                        isActive("/account/profile")
-                          ? "bg-blue-50 text-blue-500"
-                          : ""
-                      }`}
-                    >
-                      Профиль
-                    </Link>
-                    <Link
-                      href="/account/issues"
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                        isActive("/account/issues")
-                          ? "bg-blue-50 text-blue-500"
-                          : ""
-                      }`}
-                    >
-                      Мои проблемы
-                    </Link>
-                    <Link
-                      href="/account/add-issue"
-                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
-                        isActive("/account/add-issue")
-                          ? "bg-blue-50 text-blue-500"
-                          : ""
-                      }`}
-                    >
-                      Добавить проблему
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      className="justify-start px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100"
-                      onClick={() => {
-                        /* Add logout functionality */
-                      }}
-                    >
-                      Выход
-                    </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
+              <UserNav onMenuOpen={() => setIsOpen(true)} />
             </>
           ) : (
             <>
@@ -164,6 +85,83 @@ export const Header = () => {
           )}
         </div>
       </div>
+      {isAuthenticated && (
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetContent side="left" className="w-64 md:hidden">
+            <SheetHeader>
+              <SheetTitle className="text-xl font-bold text-blue-500">
+                ainala
+              </SheetTitle>
+            </SheetHeader>
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                href="/"
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  isActive("/") &&
+                  pathname !== "/issues" &&
+                  !pathname.startsWith("/account")
+                    ? "bg-blue-50 text-blue-500"
+                    : ""
+                }`}
+              >
+                <FaHome className="mr-2 h-4 w-4" />
+                Главная
+              </Link>
+              <Link
+                href="/issues"
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  isActive("/issues") ? "bg-blue-50 text-blue-500" : ""
+                }`}
+              >
+                Проблемы
+              </Link>
+              <Link
+                href="/account"
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  isActive("/account") ? "bg-blue-50 text-blue-500" : ""
+                }`}
+              >
+                Личный кабинет
+              </Link>
+              <Link
+                href="/account/profile"
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  isActive("/account/profile") ? "bg-blue-50 text-blue-500" : ""
+                }`}
+              >
+                Профиль
+              </Link>
+              <Link
+                href="/account/issues"
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  isActive("/account/issues") ? "bg-blue-50 text-blue-500" : ""
+                }`}
+              >
+                Мои проблемы
+              </Link>
+              <Link
+                href="/account/add-issue"
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 ${
+                  isActive("/account/add-issue")
+                    ? "bg-blue-50 text-blue-500"
+                    : ""
+                }`}
+              >
+                Добавить проблему
+              </Link>
+              <Button
+                variant="ghost"
+                className="justify-start px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100"
+                onClick={() => {
+                  /* Add logout functionality */
+                }}
+              >
+                Выход
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
     </header>
   );
 };
