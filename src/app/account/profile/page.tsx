@@ -185,7 +185,7 @@ export default function ProfilePage() {
                           className="hidden"
                         />
                       </Button>
-                      <Button className="w-full xs:w-auto border border-gray-200 bg-white hover:bg-gray-100 h-10 px-4 py-2 rounded-md">
+                      <Button className="w-full xs:w-auto border border-gray-200 bg-[#ac0000] hover:bg-gray-100 h-10 px-4 py-2 rounded-md">
                         Удалить
                       </Button>
                     </div>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
                                 <Input
                                   placeholder="Иван Иванов"
                                   {...field}
-                                  className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                                  className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                                 />
                               </FormControl>
                               <FaUser className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
@@ -264,7 +264,7 @@ export default function ProfilePage() {
                                 <Input
                                   placeholder="email@example.com"
                                   {...field}
-                                  className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                                  className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                                 />
                               </FormControl>
                               <FaEnvelope className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                                     showCurrentPassword ? "text" : "password"
                                   }
                                   {...field}
-                                  className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                                  className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                                 />
                               </FormControl>
                               <FaLock className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
@@ -366,7 +366,7 @@ export default function ProfilePage() {
                                   placeholder="******"
                                   type={showNewPassword ? "text" : "password"}
                                   {...field}
-                                  className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                                  className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                                 />
                               </FormControl>
                               <FaLock className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
@@ -405,7 +405,7 @@ export default function ProfilePage() {
                                     showConfirmPassword ? "text" : "password"
                                   }
                                   {...field}
-                                  className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                                  className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                                 />
                               </FormControl>
                               <FaLock className="absolute left-3 top-3 h-4 w-4 text-blue-400" />

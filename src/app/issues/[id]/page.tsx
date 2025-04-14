@@ -288,8 +288,9 @@ export default function IssueDetailsPage() {
                         >
                           <Image
                             src={photo}
-                            alt={`Фото результата ${index + 1}`}
+                            alt={`Фото проблемы ${index + 1}`}
                             fill
+                            unoptimized
                             className="object-cover transition-transform hover:scale-105"
                           />
                         </div>
@@ -320,6 +321,7 @@ export default function IssueDetailsPage() {
                               alt={comment.userName}
                               width={40}
                               height={40}
+                              unoptimized
                               className="rounded-full"
                             />
                           ) : (
@@ -457,46 +459,6 @@ export default function IssueDetailsPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
-              <CardHeader className="p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-white">
-                <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-900">
-                  Похожие проблемы
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
-                <div className="space-y-3 mt-4">
-                  <Link
-                    href={`/issues/2`}
-                    className="block hover:bg-blue-50 p-3 rounded-md border border-gray-100 transition-colors"
-                  >
-                    <p className="font-medium text-gray-900">
-                      Неработающий фонарь
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Категория: Освещение
-                    </p>
-                  </Link>
-                  <Link
-                    href={`/issues/3`}
-                    className="block hover:bg-blue-50 p-3 rounded-md border border-gray-100 transition-colors"
-                  >
-                    <p className="font-medium text-gray-900">
-                      Сломанная скамейка
-                    </p>
-                    <p className="text-sm text-gray-500">Категория: Парки</p>
-                  </Link>
-                  <Link
-                    href={`/issues/4`}
-                    className="block hover:bg-blue-50 p-3 rounded-md border border-gray-100 transition-colors"
-                  >
-                    <p className="font-medium text-gray-900">
-                      Мусор вдоль дороги
-                    </p>
-                    <p className="text-sm text-gray-500">Категория: Чистота</p>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

@@ -34,7 +34,7 @@ export const Footer = () => {
                 <div className="text-blue-500 h-6 w-6 flex items-center justify-center rounded border border-blue-500">
                   <FaMapMarkerAlt className="h-3 w-3" />
                 </div>
-                <span className="text-xl font-bold text-gray-900">ГородОК</span>
+                <span className="text-xl font-bold text-gray-900">ainala</span>
               </div>
             </Link>
             <p className="text-sm text-gray-500 max-w-xs">
@@ -43,7 +43,7 @@ export const Footer = () => {
               граждан и власти для создания лучших городов.
             </p>
             <p className="text-xs text-gray-400 mt-4">
-              © {new Date().getFullYear()} ГородОК. Все права защищены.
+              © {new Date().getFullYear()} ainala. Все права защищены.
             </p>
           </div>
 

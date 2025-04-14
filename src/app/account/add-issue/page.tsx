@@ -170,7 +170,7 @@ export default function AddIssuePage() {
                           <Input
                             placeholder="Например: Неработающий фонарь на улице Ленина"
                             {...field}
-                            className="pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-blue-500"
+                            className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-blue-500"
                           />
                         </FormControl>
                         <FaHeading className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
@@ -194,7 +194,7 @@ export default function AddIssuePage() {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
-                            <SelectTrigger className="w-full pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+                            <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
                               <SelectValue placeholder="Выберите категорию" />
                             </SelectTrigger>
                             <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">

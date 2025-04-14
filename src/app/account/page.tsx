@@ -154,28 +154,20 @@ export default function AccountPage() {
                 Список ваших последних проблем для быстрого доступа
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0">
+            <CardContent className="p-0">
               {issues.length > 0 ? (
-                <div className="space-y-4 mt-2">
-                  {issues.slice(0, 5).map((issue) => (
+                <div className="divide-y divide-gray-100">
+                  {issues.slice(0, 3).map((issue) => (
                     <div
                       key={issue.id}
-                      className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0 hover:bg-gray-50 p-2 rounded-md transition-colors"
+                      className="p-4 hover:bg-gray-50 transition-colors"
                     >
-                      <div>
-                        <h3 className="font-medium text-gray-900">
+                      <div className="flex justify-between mb-2">
+                        <h3 className="font-medium text-gray-900 text-base">
                           {issue.title}
                         </h3>
-                        <p className="text-sm text-gray-500">
-                          {issue.description.substring(0, 60)}...
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatDate(issue.createdAt)}
-                        </p>
-                      </div>
-                      <div>
                         <span
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${
+                          className={`text-xs font-medium px-2 py-1 rounded-full flex-shrink-0 ${
                             issue.status === "done"
                               ? "bg-green-100 text-green-800"
                               : issue.status === "progress"
@@ -190,11 +182,32 @@ export default function AccountPage() {
                             : "К выполнению"}
                         </span>
                       </div>
+                      <p className="text-sm text-gray-500 line-clamp-2 mb-2">
+                        {issue.description}
+                      </p>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <span className="inline-flex items-center">
+                          <svg
+                            className="mr-1 h-3 w-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          {formatDate(issue.createdAt)}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg mt-4">
+                <div className="text-center py-8 bg-gray-50">
                   <p className="text-gray-500">У вас пока нет проблем</p>
                   <Link href="/account/add-issue">
                     <Button className="mt-4 bg-blue-500 text-white hover:bg-blue-600 h-10 px-4 py-2 rounded-md">
@@ -215,21 +228,79 @@ export default function AccountPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border shadow"
-                modifiers={{
-                  hasIssue: (day) => hasIssueOnDate(day),
-                }}
-                modifiersClassNames={{
-                  hasIssue: "bg-blue-50 font-bold text-blue-600",
-                  selected: "bg-blue-100 text-blue-800",
-                }}
-                fromMonth={new Date(2023, 0)}
-                toMonth={new Date(2025, 11)}
-              />
+              <div className="text-center mb-2">
+                <h3 className="text-lg font-medium">April 2025</h3>
+              </div>
+              <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                <div className="text-sm font-medium">Su</div>
+                <div className="text-sm font-medium">Mo</div>
+                <div className="text-sm font-medium">Tu</div>
+                <div className="text-sm font-medium">We</div>
+                <div className="text-sm font-medium">Th</div>
+                <div className="text-sm font-medium">Fr</div>
+                <div className="text-sm font-medium">Sa</div>
+              </div>
+              <div className="grid grid-cols-7 gap-1 text-center">
+                {Array.from({ length: 30 }, (_, i) => {
+                  const day = i + 1;
+                  const hasIssue = hasIssueOnDate(new Date(2025, 3, day));
+                  const isSelected =
+                    date && date.getDate() === day && date.getMonth() === 3;
+                  const isToday = day === 14; // April 14 is "today"
+
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => setDate(new Date(2025, 3, day))}
+                      className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
+                        isToday
+                          ? "bg-blue-100 text-blue-600 font-bold"
+                          : isSelected
+                          ? "bg-blue-500 text-white"
+                          : hasIssue
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between mt-4">
+                <button className="p-1 rounded-full hover:bg-gray-100">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                <button className="p-1 rounded-full hover:bg-gray-100">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
             </CardContent>
           </Card>
 
@@ -276,7 +347,7 @@ export default function AccountPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg mt-4">
+                <div className="text-center text-[15px] py-8 bg-gray-50 rounded-lg mt-4">
                   <p className="text-gray-500">Нет проблем за выбранную дату</p>
                 </div>
               )}

@@ -112,7 +112,7 @@ export const Header = () => {
             </Sheet>
           </div>
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-blue-500">ГородОК</span>
+            <span className="text-xl font-bold text-blue-500">ainala</span>
           </Link>
           <nav className="hidden gap-6 md:flex">
             <Link
