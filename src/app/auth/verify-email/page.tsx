@@ -84,33 +84,15 @@ export default function VerifyEmailPage() {
               disabled={loading}
             >
               <InputOTPGroup>
-                <InputOTPSlot
-                  index={0}
-                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
-                />
-                <InputOTPSlot
-                  index={1}
-                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
-                />
-                <InputOTPSlot
-                  index={2}
-                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
-                />
+                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
+                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
+                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
               </InputOTPGroup>
               <InputOTPSeparator />
               <InputOTPGroup>
-                <InputOTPSlot
-                  index={3}
-                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
-                />
-                <InputOTPSlot
-                  index={4}
-                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
-                />
-                <InputOTPSlot
-                  index={5}
-                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
-                />
+                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
+                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
+                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
               </InputOTPGroup>
             </InputOTP>
           </div>
