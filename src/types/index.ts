@@ -1,4 +1,5 @@
-export type UserRole = "user" | "admin";
+// src/types/index.ts
+export type UserRole = "user" | "admin" | "executor";
 
 export interface User {
   id: string;
@@ -8,7 +9,7 @@ export interface User {
   avatar?: string;
 }
 
-export type IssueStatus = "to do" | "progress" | "done" | "reject";
+export type IssueStatus = "to do" | "progress" | "review" | "done" | "reject";
 
 export type IssueCategory =
   | "roads"
@@ -37,6 +38,12 @@ export interface Issue {
   assignedTo?: string;
   importance?: "low" | "medium" | "high";
   adminComment?: string;
+  city?: string;
+  district?: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface Comment {
@@ -47,4 +54,15 @@ export interface Comment {
   userAvatar?: string;
   content: string;
   createdAt: string;
+}
+
+export interface City {
+  id: string;
+  name: string;
+  districts: District[];
+}
+
+export interface District {
+  id: string;
+  name: string;
 }

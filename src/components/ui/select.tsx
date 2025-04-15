@@ -5,7 +5,12 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Select = SelectPrimitive.Root
+// Wrapped Select component to handle undefined values properly
+const Select = ({ value, defaultValue, ...props }) => {
+  // Ensure we're not passing both value and defaultValue which can cause issues
+  const safeProps = value !== undefined ? { value, ...props } : { defaultValue, ...props };
+  return <SelectPrimitive.Root {...safeProps} />;
+}
 
 const SelectGroup = SelectPrimitive.Group
 

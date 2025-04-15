@@ -1,7 +1,6 @@
-// src/app/account/issues/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,6 +13,9 @@ import {
   FaList,
   FaExclamationTriangle,
   FaPaperclip,
+  FaFilter,
+  FaCalendarAlt,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +29,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAppSelector } from "@/lib/store";
-import { formatDate, getCategoryName, getStatusName } from "@/lib/utils";
+import {
+  formatDate,
+  getCategoryName,
+  getStatusName,
+  getStatusColor,
+} from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -54,10 +61,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export default function IssuesPage() {
   const { user } = useAppSelector((state) => state.auth);
   const isAdmin = user?.role === "admin";
+  const isExecutor = user?.role === "executor";
+  const isUser = user?.role === "user";
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
@@ -67,9 +84,11 @@ export default function IssuesPage() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [completeAdminModalOpen, setCompleteAdminModalOpen] = useState(false);
   const [issueToDelete, setIssueToDelete] = useState<any>(null);
   const [issueToReject, setIssueToReject] = useState<any>(null);
   const [issueToView, setIssueToView] = useState<any>(null);
+  const [issueToComplete, setIssueToComplete] = useState<any>(null);
 
   // Accept Modal State
   const [responsiblePerson, setResponsiblePerson] = useState("Tender");
@@ -83,7 +102,47 @@ export default function IssuesPage() {
   const [resultPhotos, setResultPhotos] = useState<File[]>([]);
   const [resultPreviewUrls, setResultPreviewUrls] = useState<string[]>([]);
 
-  // Имитация данных проблем
+  // Admin Complete Modal State
+  const [adminComment, setAdminComment] = useState("");
+
+  // Filter states
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+
+  // Get all possible statuses based on user role
+  const getStatusesForRole = () => {
+    if (isAdmin) {
+      return [
+        { value: "to do", label: "К выполнению" },
+        { value: "progress", label: "В работе" },
+        { value: "review", label: "На проверке" },
+        { value: "done", label: "Выполнено" },
+        { value: "reject", label: "Отклонено" },
+      ];
+    } else if (isExecutor) {
+      return [
+        { value: "progress", label: "В работе" },
+        { value: "review", label: "На проверке" },
+        { value: "done", label: "Выполнено" },
+        { value: "reject", label: "Отклонено" },
+      ];
+    } else {
+      // Regular user
+      return [
+        { value: "to do", label: "К выполнению" },
+        { value: "progress", label: "В работе" },
+        { value: "review", label: "На проверке" },
+        { value: "done", label: "Выполнено" },
+        { value: "reject", label: "Отклонено" },
+      ];
+    }
+  };
+
+  const statuses = getStatusesForRole();
+  const defaultStatus = statuses[0].value;
+  const [activeStatus, setActiveStatus] = useState(defaultStatus);
+
+  // Имитация данных проблем с большим количеством разнообразных записей
   const [issues] = useState([
     {
       id: "1",
@@ -93,10 +152,13 @@ export default function IssuesPage() {
       category: "roads",
       createdAt: new Date(2023, 3, 15).toISOString(),
       userName: "Иван Иванов",
+      userId: "123",
       deadline: new Date(2023, 4, 1).toISOString(),
       assignedTo: "Дорожная служба",
       importance: "high",
       adminComment: "Проблема решена, яма заделана",
+      city: "almaty",
+      district: "almaly",
       photo:
         "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
     },
@@ -108,9 +170,12 @@ export default function IssuesPage() {
       category: "lighting",
       createdAt: new Date(2023, 4, 20).toISOString(),
       userName: "Иван Иванов",
+      userId: "123",
       deadline: new Date(2023, 5, 1).toISOString(),
       assignedTo: "Служба освещения",
       importance: "medium",
+      city: "almaty",
+      district: "auezov",
       photo:
         "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
     },
@@ -122,20 +187,116 @@ export default function IssuesPage() {
       category: "parks",
       createdAt: new Date(2023, 4, 25).toISOString(),
       userName: "Иван Иванов",
+      userId: "123",
+      city: "almaty",
+      district: "bostandyk",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
+    },
+    {
+      id: "4",
+      title: "Отсутствие уличных указателей",
+      description: "На перекрестке отсутствуют указатели улиц",
+      status: "review",
+      category: "safety",
+      createdAt: new Date(2023, 5, 5).toISOString(),
+      userName: "Петр Петров",
+      userId: "456",
+      deadline: new Date(2023, 5, 20).toISOString(),
+      assignedTo: "Городская служба",
+      importance: "low",
+      city: "astana",
+      district: "esil",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
+    },
+    {
+      id: "5",
+      title: "Переполненные мусорные баки",
+      description: "Во дворе дома не вывозят мусор уже неделю",
+      status: "reject",
+      category: "cleanliness",
+      createdAt: new Date(2023, 5, 10).toISOString(),
+      userName: "Мария Сидорова",
+      userId: "789",
+      deadline: new Date(2023, 5, 15).toISOString(),
+      assignedTo: "Служба уборки",
+      importance: "high",
+      adminComment: "Не в нашей компетенции, обратитесь в управляющую компанию",
+      city: "shymkent",
+      district: "abay",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
+    },
+    {
+      id: "6",
+      title: "Отсутствие пандусов",
+      description: "В здании администрации отсутствуют пандусы для инвалидов",
+      status: "progress",
+      category: "other",
+      createdAt: new Date(2023, 6, 1).toISOString(),
+      userName: "Алексей Иванов",
+      userId: "101",
+      deadline: new Date(2023, 7, 1).toISOString(),
+      assignedTo: "Строительная служба",
+      importance: "medium",
+      city: "karaganda",
+      district: "kazybek-bi",
+      photo:
+        "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
+    },
+    {
+      id: "7",
+      title: "Проблемы с автобусным маршрутом",
+      description: "Автобус №42 не соблюдает расписание",
+      status: "review",
+      category: "public_transport",
+      createdAt: new Date(2023, 6, 15).toISOString(),
+      userName: "Елена Смирнова",
+      userId: "202",
+      deadline: new Date(2023, 7, 10).toISOString(),
+      assignedTo: "Транспортная служба",
+      importance: "low",
+      city: "aktobe",
+      district: "astana",
       photo:
         "https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442",
     },
   ]);
 
   const filteredIssues = (status: string) => {
-    return issues
-      .filter((issue) => issue.status === status)
-      .filter(
+    let result = issues;
+
+    // Filter by user ID for regular users
+    if (isUser && !isAdmin && !isExecutor) {
+      result = result.filter((issue) => issue.userId === user?.id);
+    }
+
+    // Filter by status
+    result = result.filter((issue) => issue.status === status);
+
+    // Filter by search query
+    if (searchQuery) {
+      result = result.filter(
         (issue) =>
-          searchQuery === "" ||
           issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           issue.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
+    }
+
+    // Filter by date
+    if (dateFilter) {
+      result = result.filter((issue) => {
+        const issueDate = new Date(issue.createdAt);
+        return (
+          issueDate.getDate() === dateFilter.getDate() &&
+          issueDate.getMonth() === dateFilter.getMonth() &&
+          issueDate.getFullYear() === dateFilter.getFullYear()
+        );
+      });
+    }
+
+    return result;
   };
 
   const handleAcceptIssue = (issue: any) => {
@@ -154,6 +315,12 @@ export default function IssuesPage() {
     setCompleteComment("");
     setResultPhotos([]);
     setResultPreviewUrls([]);
+  };
+
+  const handleAdminCompleteIssue = (issue: any) => {
+    setIssueToComplete(issue);
+    setCompleteAdminModalOpen(true);
+    setAdminComment("");
   };
 
   const handleAcceptSubmit = () => {
@@ -177,6 +344,14 @@ export default function IssuesPage() {
     setIsCompleteModalOpen(false);
   };
 
+  const handleAdminCompleteSubmit = () => {
+    console.log("Admin completing issue:", {
+      issueId: issueToComplete?.id,
+      comment: adminComment,
+    });
+    setCompleteAdminModalOpen(false);
+  };
+
   const handleResultPhotoChange = (files: FileList | null) => {
     if (files) {
       const fileArray = Array.from(files);
@@ -194,21 +369,41 @@ export default function IssuesPage() {
     }
   };
 
+  const getStatusBadgeClass = (status: string) => {
+    const statusColors = {
+      "to do": "bg-gray-100 text-gray-800 hover:bg-gray-100",
+      progress: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+      review: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+      done: "bg-green-100 text-green-800 hover:bg-green-100",
+      reject: "bg-red-100 text-red-800 hover:bg-red-100",
+    };
+
+    return (
+      statusColors[status as keyof typeof statusColors] || statusColors["to do"]
+    );
+  };
+
   return (
-    <div className="bg-gray-50 py-6 ">
+    <div className="bg-gray-50 py-6">
       <div className="container max-w-[1200px] px-[15px] mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
-              {isAdmin ? "Управление проблемами" : "Мои проблемы"}
+              {isAdmin
+                ? "Управление проблемами"
+                : isExecutor
+                ? "Проблемы на исполнении"
+                : "Мои проблемы"}
             </h1>
             <p className="text-gray-500">
               {isAdmin
                 ? "Просмотр и управление всеми проблемами города"
+                : isExecutor
+                ? "Список проблем, назначенных вам для решения"
                 : "Список всех созданных вами проблем и их статусы"}
             </p>
           </div>
-          {!isAdmin && (
+          {!isAdmin && !isExecutor && (
             <Link href="/account/add-issue">
               <Button className="w-full sm:w-auto bg-blue-500 text-white hover:bg-blue-600">
                 Добавить проблему
@@ -217,7 +412,7 @@ export default function IssuesPage() {
           )}
         </div>
 
-        <div className="flex items-center">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <FaSearch className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
             <Input
@@ -227,34 +422,72 @@ export default function IssuesPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-10 px-3 border border-gray-200 bg-white flex items-center gap-2"
+              >
+                <FaCalendarAlt className="h-4 w-4 text-blue-500" />
+                {dateFilter
+                  ? format(dateFilter, "dd MMMM yyyy", { locale: ru })
+                  : "Выберите дату"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setDateFilter(date);
+                }}
+                initialFocus
+              />
+              {dateFilter && (
+                <div className="px-4 pb-2">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedDate(undefined);
+                      setDateFilter(undefined);
+                    }}
+                  >
+                    Сбросить фильтр
+                  </Button>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <Tabs defaultValue="to do" className="w-full space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
-            <TabsTrigger
-              value="to do"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-            >
-              К выполнению
-            </TabsTrigger>
-            <TabsTrigger
-              value="progress"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-            >
-              В работе
-            </TabsTrigger>
-            <TabsTrigger
-              value="done"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-            >
-              Выполнено
-            </TabsTrigger>
+        <Tabs
+          defaultValue={defaultStatus}
+          className="w-full space-y-6"
+          onValueChange={setActiveStatus}
+        >
+          <TabsList className="grid w-full grid-cols-5 h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500">
+            {statuses.map((status) => (
+              <TabsTrigger
+                key={status.value}
+                value={status.value}
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+              >
+                {status.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          {["to do", "progress", "done"].map((status) => (
-            <TabsContent key={status} value={status} className="space-y-4">
-              {filteredIssues(status).length > 0 ? (
-                filteredIssues(status).map((issue) => (
+          {statuses.map((statusItem) => (
+            <TabsContent
+              key={statusItem.value}
+              value={statusItem.value}
+              className="space-y-4"
+            >
+              {filteredIssues(statusItem.value).length > 0 ? (
+                filteredIssues(statusItem.value).map((issue) => (
                   <Card
                     key={issue.id}
                     className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
@@ -273,13 +506,9 @@ export default function IssuesPage() {
                               {getCategoryName(issue.category)}
                             </Badge>
                             <Badge
-                              className={
-                                issue.status === "done"
-                                  ? "bg-green-100 text-green-800 hover:bg-green-100 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                  : issue.status === "progress"
-                                  ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                  : "bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                              }
+                              className={`${getStatusBadgeClass(
+                                issue.status
+                              )} rounded-full px-2.5 py-0.5 text-xs font-semibold`}
                             >
                               {getStatusName(issue.status)}
                             </Badge>
@@ -300,6 +529,22 @@ export default function IssuesPage() {
                                   : "Низкий приоритет"}
                               </Badge>
                             )}
+                            {issue.city && (
+                              <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100 rounded-full px-2.5 py-0.5 text-xs font-semibold">
+                                <FaMapMarkerAlt className="mr-1 h-3 w-3 inline" />
+                                {issue.city === "almaty"
+                                  ? "Алматы"
+                                  : issue.city === "astana"
+                                  ? "Астана"
+                                  : issue.city === "shymkent"
+                                  ? "Шымкент"
+                                  : issue.city === "karaganda"
+                                  ? "Караганда"
+                                  : issue.city === "aktobe"
+                                  ? "Актобе"
+                                  : issue.city}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -314,17 +559,19 @@ export default function IssuesPage() {
                           >
                             <FaEye className="h-4 w-4" />
                           </Button>
-                          {!isAdmin && issue.status === "to do" && (
-                            <Link href={`/account/add-issue?id=${issue.id}`}>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-10 w-10 rounded-md hover:bg-blue-50 hover:text-blue-600"
-                              >
-                                <FaEdit className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                          )}
+                          {!isAdmin &&
+                            !isExecutor &&
+                            issue.status === "to do" && (
+                              <Link href={`/account/add-issue?id=${issue.id}`}>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-10 w-10 rounded-md hover:bg-blue-50 hover:text-blue-600"
+                                >
+                                  <FaEdit className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                            )}
                           {isAdmin && (
                             <Button
                               size="icon"
@@ -367,7 +614,7 @@ export default function IssuesPage() {
                             <p className="font-medium">{issue.assignedTo}</p>
                           </div>
                         )}
-                        {isAdmin && (
+                        {(isAdmin || isExecutor) && (
                           <div>
                             <p className="text-gray-500">Автор:</p>
                             <p className="font-medium">{issue.userName}</p>
@@ -383,37 +630,67 @@ export default function IssuesPage() {
                         )}
                       </div>
 
-                      {isAdmin && issue.status === "to do" && (
+                      {/* Admin actions */}
+                      {isAdmin && (
                         <div className="flex gap-2 mt-4">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white h-9 rounded-md px-3"
-                            onClick={() => handleAcceptIssue(issue)}
-                          >
-                            Принять
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-red-500 text-white hover:bg-red-600 h-9 rounded-md px-3"
-                            onClick={() => {
-                              setIssueToReject(issue);
-                              setRejectModalOpen(true);
-                            }}
-                          >
-                            Отклонить
-                          </Button>
+                          {issue.status === "to do" && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white h-9 rounded-md px-3"
+                                onClick={() => handleAcceptIssue(issue)}
+                              >
+                                Назначить исполнителя
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-red-500 text-white hover:bg-red-600 h-9 rounded-md px-3"
+                                onClick={() => {
+                                  setIssueToReject(issue);
+                                  setRejectModalOpen(true);
+                                }}
+                              >
+                                Отклонить
+                              </Button>
+                            </>
+                          )}
+
+                          {issue.status === "review" && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white h-9 rounded-md px-3"
+                                onClick={() => handleAdminCompleteIssue(issue)}
+                              >
+                                Подтвердить выполнение
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-red-500 text-white hover:bg-red-600 h-9 rounded-md px-3"
+                                onClick={() => {
+                                  setIssueToReject(issue);
+                                  setRejectModalOpen(true);
+                                }}
+                              >
+                                Вернуть на доработку
+                              </Button>
+                            </>
+                          )}
                         </div>
                       )}
 
-                      {isAdmin && issue.status === "progress" && (
+                      {/* Executor actions */}
+                      {isExecutor && (
                         <div className="flex gap-2 mt-4">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white h-9 rounded-md px-3"
-                            onClick={() => handleCompleteIssue(issue)}
-                          >
-                            Завершить
-                          </Button>
+                          {issue.status === "progress" && (
+                            <Button
+                              size="sm"
+                              className="bg-blue-600 hover:bg-blue-700 text-white h-9 rounded-md px-3"
+                              onClick={() => handleCompleteIssue(issue)}
+                            >
+                              Отметить как выполненное
+                            </Button>
+                          )}
                         </div>
                       )}
                     </CardContent>
@@ -426,11 +703,13 @@ export default function IssuesPage() {
                     Проблемы не найдены
                   </h3>
                   <p className="text-gray-500 mb-6">
-                    {searchQuery
-                      ? `Не нашлось проблем по запросу "${searchQuery}"`
-                      : `В разделе "${getStatusName(status)}" пока нет проблем`}
+                    {searchQuery || dateFilter
+                      ? `Не найдено проблем по заданным параметрам`
+                      : `В разделе "${getStatusName(
+                          statusItem.value
+                        )}" пока нет проблем`}
                   </p>
-                  {!isAdmin && (
+                  {!isAdmin && !isExecutor && (
                     <Link href="/account/add-issue">
                       <Button className="bg-blue-500 hover:bg-blue-600 text-white">
                         Добавить проблему
@@ -444,11 +723,12 @@ export default function IssuesPage() {
         </Tabs>
       </div>
 
+      {/* Admin Accept Modal (Assign Executor) */}
       <Dialog open={isAcceptModalOpen} onOpenChange={setIsAcceptModalOpen}>
         <DialogContent className="sm:max-w-md md:max-w-lg p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
             <DialogTitle className="text-xl font-bold text-gray-900">
-              Управление статусом проблемы
+              Назначение исполнителя
             </DialogTitle>
           </DialogHeader>
 
@@ -497,25 +777,6 @@ export default function IssuesPage() {
                     <SelectItem value="Tomorrow">Завтра</SelectItem>
                     <SelectItem value="Next week">Следующая неделя</SelectItem>
                     <SelectItem value="Custom">Выбрать дату</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center text-blue-500">
-                <FaList className="h-5 w-5" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium mb-2 text-gray-700">Статус</p>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full bg-white border border-gray-200 h-10">
-                    <SelectValue placeholder="Выберите статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="To Do">К выполнению</SelectItem>
-                    <SelectItem value="In Progress">В работе</SelectItem>
-                    <SelectItem value="Done">Выполнено</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -582,11 +843,12 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Executor Complete Modal */}
       <Dialog open={isCompleteModalOpen} onOpenChange={setIsCompleteModalOpen}>
         <DialogContent className="sm:max-w-md lg:max-w-lg p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
             <DialogTitle className="text-xl font-bold text-gray-900">
-              Завершение проблемы
+              Отметить как выполненное
             </DialogTitle>
           </DialogHeader>
 
@@ -717,12 +979,67 @@ export default function IssuesPage() {
               className="bg-green-600 hover:bg-green-700 text-white"
               disabled={resultPreviewUrls.length === 0}
             >
-              Завершить
+              Отправить на проверку
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Admin Complete Modal (Approve Completed Issue) */}
+      <Dialog
+        open={completeAdminModalOpen}
+        onOpenChange={setCompleteAdminModalOpen}
+      >
+        <DialogContent className="sm:max-w-md lg:max-w-lg p-0 rounded-lg overflow-hidden shadow-lg">
+          <DialogHeader className="p-6 bg-gradient-to-r from-green-50 to-white">
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              Подтверждение выполнения
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="p-6 space-y-6">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-medium mb-2 text-gray-900">
+                {issueToComplete?.title}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {issueToComplete?.description}
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <Label className="block text-sm font-medium mb-2 text-gray-700">
+                Комментарий администратора
+              </Label>
+              <Textarea
+                placeholder="Добавьте комментарий о выполненной работе"
+                value={adminComment}
+                onChange={(e) => setAdminComment(e.target.value)}
+                rows={4}
+                className="w-full rounded-md border border-gray-200"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="p-6 bg-gray-50 border-t flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setCompleteAdminModalOpen(false)}
+              className="border border-gray-200 bg-white hover:bg-gray-100"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleAdminCompleteSubmit}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Подтвердить выполнение
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Issue Modal */}
       <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
         <DialogContent className="sm:max-w-4xl p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
@@ -776,6 +1093,30 @@ export default function IssuesPage() {
                       </p>
                     </div>
                   )}
+                  {issueToView?.city && (
+                    <div>
+                      <p className="text-gray-500">Город:</p>
+                      <p className="font-medium">
+                        {issueToView.city === "almaty"
+                          ? "Алматы"
+                          : issueToView.city === "astana"
+                          ? "Астана"
+                          : issueToView.city === "shymkent"
+                          ? "Шымкент"
+                          : issueToView.city === "karaganda"
+                          ? "Караганда"
+                          : issueToView.city === "aktobe"
+                          ? "Актобе"
+                          : issueToView.city}
+                      </p>
+                    </div>
+                  )}
+                  {issueToView?.district && (
+                    <div>
+                      <p className="text-gray-500">Район:</p>
+                      <p className="font-medium">{issueToView.district}</p>
+                    </div>
+                  )}
                 </div>
 
                 {issueToView?.adminComment && (
@@ -795,7 +1136,7 @@ export default function IssuesPage() {
                 <div className="grid grid-cols-1 gap-4">
                   <div className="relative aspect-video rounded-md overflow-hidden border border-gray-200 shadow-sm">
                     <Image
-                      src="https://sun9-65.userapi.com/s/v1/if2/nttySWpyrJxho8BV4vOBi4Se_XTHEZJt2QTcTRXHiQH04jdoZBoopRNwDgKdgJ00SIpvAi93APbZZpIMZT8CKTI1.jpg?quality=96&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,442x442&from=bu&u=orFgsJiOsLFnnncES6c-NzoYx7DkF56--_Rg871rF3k&cs=442x442"
+                      src={issueToView?.photo || ""}
                       alt="Фотография проблемы"
                       fill
                       unoptimized
@@ -826,7 +1167,7 @@ export default function IssuesPage() {
           <DialogFooter className="p-6 bg-gray-50 border-t flex justify-end">
             <Button
               onClick={() => setViewModalOpen(false)}
-              className="border border-gray-200 !bg-blue"
+              className="bg-blue-500 text-white hover:bg-blue-600"
             >
               Закрыть
             </Button>
@@ -834,6 +1175,7 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Modal */}
       <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -858,13 +1200,14 @@ export default function IssuesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Reject Modal */}
       <AlertDialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Отклонить проблему?</AlertDialogTitle>
             <AlertDialogDescription>
               Вы собираетесь отклонить проблему "{issueToReject?.title}".
-              Пожалуйста, убедитесь, что указали причину отказа.
+              Пожалуйста, укажите причину отказа.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="mb-4">

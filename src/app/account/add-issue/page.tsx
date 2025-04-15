@@ -5,7 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { FaHeading, FaList, FaFileUpload } from "react-icons/fa";
+import {
+  FaHeading,
+  FaList,
+  FaFileUpload,
+  FaMapMarkerAlt,
+  FaCity,
+} from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,8 +37,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
-import { getCategoryName } from "@/lib/utils";
+import { getCategoryName, getCityDistricts } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+// Import Map component dynamically to avoid SSR issues
+const MapComponent = dynamic(() => import("@/components/map-component"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-64 bg-gray-100 flex items-center justify-center rounded-md">
+      <p className="text-gray-500">Загрузка карты...</p>
+    </div>
+  ),
+});
 
 const issueSchema = z.object({
   title: z.string().min(5, "Заголовок должен содержать не менее 5 символов"),
@@ -40,6 +58,8 @@ const issueSchema = z.object({
   description: z
     .string()
     .min(20, "Описание должно содержать не менее 20 символов"),
+  city: z.string().min(1, "Выберите город"),
+  district: z.string().min(1, "Выберите район"),
 });
 
 const categories = [
@@ -64,6 +84,15 @@ export default function AddIssuePage() {
   const [error, setError] = useState<string | null>(null);
   const [isEdit, setIsEdit] = useState(!!issueId);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+
+  // Get city and district data
+  const cityDistrictsData = getCityDistricts();
+  const [availableDistricts, setAvailableDistricts] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(issueSchema),
@@ -71,8 +100,29 @@ export default function AddIssuePage() {
       title: "",
       category: "",
       description: "",
+      city: "",
+      district: "",
     },
   });
+
+  // Get the selected city and update available districts
+  const selectedCity = form.watch("city");
+
+  useEffect(() => {
+    if (selectedCity) {
+      const cityData = cityDistrictsData.cities.find(
+        (city) => city.value === selectedCity
+      );
+      setAvailableDistricts(cityData ? cityData.districts : []);
+
+      // Reset district when city changes
+      if (!isEdit) {
+        form.setValue("district", "");
+      }
+    } else {
+      setAvailableDistricts([]);
+    }
+  }, [selectedCity, form, cityDistrictsData.cities, isEdit]);
 
   useEffect(() => {
     if (issueId) {
@@ -82,13 +132,35 @@ export default function AddIssuePage() {
           category: "roads",
           description:
             "Большая яма на пересечении улиц Ленина и Пушкина. Нужно срочно заделать.",
+          city: "almaty",
+          district: "almaly",
         });
         setIsEdit(true);
         // Добавляем мок-превью для редактирования
         setPreviewUrls([
           "https://orda.kz/uploads/posts/2024-07/sizes/1440x810/fa7420a0-93ec-4939-a8f7-09033041788f.webp",
         ]);
+        setLocation({ lat: 43.238949, lng: 76.889709 }); // Almaty coordinates
       }, 500);
+    } else {
+      // Try to get user's location for new issues
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          () => {
+            // Default to Almaty if geolocation is denied
+            setLocation({ lat: 43.238949, lng: 76.889709 });
+          }
+        );
+      } else {
+        // Default coordinates for fallback
+        setLocation({ lat: 43.238949, lng: 76.889709 });
+      }
     }
   }, [issueId, form]);
 
@@ -97,6 +169,16 @@ export default function AddIssuePage() {
     setError(null);
 
     try {
+      // Add location data to the form data
+      const submissionData = {
+        ...data,
+        location,
+        photos: photos, // Send the file objects
+      };
+
+      console.log("Submitting issue:", submissionData);
+
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       router.push("/account/issues");
     } catch (err) {
@@ -128,6 +210,10 @@ export default function AddIssuePage() {
     }
   };
 
+  const handleMapClick = (coords: { lat: number; lng: number }) => {
+    setLocation(coords);
+  };
+
   return (
     <div className="bg-gray-50 py-6">
       <div className="container max-w-[1200px] px-[15px] mx-auto space-y-6">
@@ -148,7 +234,8 @@ export default function AddIssuePage() {
               Информация о проблеме
             </CardTitle>
             <CardDescription className="text-sm text-gray-500">
-              Подробно опишите проблему и приложите фотографии
+              Подробно опишите проблему, выберите категорию и укажите
+              местоположение
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
@@ -180,37 +267,120 @@ export default function AddIssuePage() {
                   )}
                 />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Категория
+                        </FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+                                <SelectValue placeholder="Выберите категорию" />
+                              </SelectTrigger>
+                              <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
+                                {categories.map((category) => (
+                                  <SelectItem
+                                    key={category.value}
+                                    value={category.value}
+                                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
+                                  >
+                                    {category.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FaList className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
+                        </div>
+                        <FormMessage className="text-sm font-medium text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Город
+                        </FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+                                <SelectValue placeholder="Выберите город" />
+                              </SelectTrigger>
+                              <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
+                                {cityDistrictsData.cities.map((city) => (
+                                  <SelectItem
+                                    key={city.value}
+                                    value={city.value}
+                                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
+                                  >
+                                    {city.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FaCity className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
+                        </div>
+                        <FormMessage className="text-sm font-medium text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="district"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Категория
+                        Район
                       </FormLabel>
                       <div className="relative">
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
+                            disabled={!selectedCity}
                           >
                             <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
-                              <SelectValue placeholder="Выберите категорию" />
+                              <SelectValue
+                                placeholder={
+                                  selectedCity
+                                    ? "Выберите район"
+                                    : "Сначала выберите город"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
-                              {categories.map((category) => (
+                              {availableDistricts.map((district) => (
                                 <SelectItem
-                                  key={category.value}
-                                  value={category.value}
+                                  key={district.value}
+                                  value={district.value}
                                   className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
                                 >
-                                  {category.label}
+                                  {district.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </FormControl>
-                        <FaList className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
+                        <FaMapMarkerAlt className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
                       </div>
                       <FormMessage className="text-sm font-medium text-red-500" />
                     </FormItem>
@@ -237,6 +407,28 @@ export default function AddIssuePage() {
                     </FormItem>
                   )}
                 />
+
+                <div className="space-y-2">
+                  <FormLabel className="text-sm font-medium">
+                    Местоположение на карте
+                  </FormLabel>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Укажите точное местоположение проблемы на карте, кликнув по
+                    нужной точке
+                  </p>
+                  <div className="w-full h-64 rounded-md overflow-hidden border border-gray-200">
+                    <MapComponent
+                      location={location}
+                      onLocationSelect={handleMapClick}
+                    />
+                  </div>
+                  {location && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Выбранные координаты: {location.lat.toFixed(6)},{" "}
+                      {location.lng.toFixed(6)}
+                    </p>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   <FormLabel className="text-sm font-medium">
@@ -336,7 +528,7 @@ export default function AddIssuePage() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !location}
                     className="bg-blue-500 text-white hover:bg-blue-600"
                   >
                     {loading

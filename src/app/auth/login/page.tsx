@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+  FaUserShield,
+} from "react-icons/fa";
 import { useAppDispatch } from "@/lib/store";
 import { loginSuccess } from "@/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
@@ -27,10 +33,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   email: z.string().email("Неверный формат email"),
   password: z.string().min(6, "Пароль должен быть не менее 6 символов"),
+  role: z.enum(["user", "admin", "executor"]).default("user"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -48,6 +62,7 @@ export default function LoginPage() {
     defaultValues: {
       email: "",
       password: "",
+      role: "user",
     },
   });
 
@@ -63,7 +78,7 @@ export default function LoginPage() {
           id: "1",
           name: "Тестовый Пользователь",
           email: data.email,
-          role: "user" as const,
+          role: data.role,
         },
         token: "mock_jwt_token",
       };
@@ -154,6 +169,41 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+
+              {/* For demo purposes - Role selection */}
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-900">
+                      Роль (для демонстрации)
+                    </FormLabel>
+                    <div className="relative">
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger className="w-full pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+                            <SelectValue placeholder="Выберите роль" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">Пользователь</SelectItem>
+                            <SelectItem value="executor">
+                              Исполнитель
+                            </SelectItem>
+                            <SelectItem value="admin">Администратор</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FaUserShield className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    </div>
+                    <FormMessage className="text-sm font-medium text-red-500" />
+                  </FormItem>
+                )}
+              />
+
               {error && (
                 <div className="text-sm font-medium text-red-500">{error}</div>
               )}

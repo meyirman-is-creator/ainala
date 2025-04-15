@@ -8,24 +8,20 @@ interface AuthState {
   isLoading: boolean;
 }
 
-// const initialState: AuthState = {
-//   user: null,
-//   token: null,
-//   isAuthenticated: false,
-//   isLoading: false,
-// };
+// For development purposes, we're setting a default user
+// In a real application, this would start as null and require login
 const initialState: AuthState = {
-    user: {
-      id: "test-user-id",
-      name: "Тестовый Пользователь",
-      email: "test@example.com",
-      role: "user", // Можно переключать между "user" и "admin" для тестирования разных ролей
-      avatar: "",
-    },
-    token: "mock-token",
-    isAuthenticated: true, // Автоматически считаем, что пользователь авторизован
-    isLoading: false,
-  };
+  user: {
+    id: "test-user-id",
+    name: "Тестовый Пользователь",
+    email: "test@example.com",
+    role: "user", // Can be "user", "admin", or "executor"
+    avatar: "",
+  },
+  token: "mock-token",
+  isAuthenticated: true, // Automatically consider the user authenticated
+  isLoading: false,
+};
 
 export const authSlice = createSlice({
   name: "auth",
@@ -57,10 +53,25 @@ export const authSlice = createSlice({
     updateUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
+    // Add a function to switch roles (for testing)
+    switchRole: (
+      state,
+      action: PayloadAction<"user" | "admin" | "executor">
+    ) => {
+      if (state.user) {
+        state.user.role = action.payload;
+      }
+    },
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout, updateUser } =
-  authSlice.actions;
+export const {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  logout,
+  updateUser,
+  switchRole,
+} = authSlice.actions;
 
 export default authSlice.reducer;
