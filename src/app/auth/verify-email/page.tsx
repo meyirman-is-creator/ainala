@@ -34,7 +34,6 @@ export default function VerifyEmailPage() {
 
     try {
       // Имитация запроса к API
-      // В реальном приложении здесь был бы запрос к бэкенду
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Перенаправление на страницу входа
@@ -79,20 +78,56 @@ export default function VerifyEmailPage() {
             <InputOTP
               maxLength={6}
               value={value}
-              onChange={(value) => setValue(value)}
+              onChange={(val) => setValue(val)}
               onComplete={handleComplete}
               disabled={loading}
             >
               <InputOTPGroup>
-                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
-                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
-                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
+                <InputOTPSlot
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                  isActive={false}
+                  char=""
+                  placeholderChar=" "
+                  hasFakeCaret={false}
+                />
+                <InputOTPSlot
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                  isActive={false}
+                  char=""
+                  placeholderChar=" "
+                  hasFakeCaret={false}
+                />
+                <InputOTPSlot
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                  isActive={false}
+                  char=""
+                  placeholderChar=" "
+                  hasFakeCaret={false}
+                />
               </InputOTPGroup>
               <InputOTPSeparator />
               <InputOTPGroup>
-                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
-                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
-                <InputOTPSlot className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white" />
+                <InputOTPSlot
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                  isActive={false}
+                  char=""
+                  placeholderChar=" "
+                  hasFakeCaret={false}
+                />
+                <InputOTPSlot
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                  isActive={false}
+                  char=""
+                  placeholderChar=" "
+                  hasFakeCaret={false}
+                />
+                <InputOTPSlot
+                  className="h-10 w-10 relative flex items-center justify-center rounded-md border border-gray-200 bg-white"
+                  isActive={false}
+                  char=""
+                  placeholderChar=" "
+                  hasFakeCaret={false}
+                />
               </InputOTPGroup>
             </InputOTP>
           </div>

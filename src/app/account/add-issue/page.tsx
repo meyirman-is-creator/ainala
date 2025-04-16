@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,7 @@ import {
   FaFileUpload,
   FaMapMarkerAlt,
   FaCity,
+  FaAddressCard,
 } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,21 +38,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
-import { getCategoryName, getCityDistricts } from "@/lib/utils";
-import dynamic from "next/dynamic";
+import { getCityDistricts } from "@/lib/utils";
 
-// Import Map component dynamically to avoid SSR issues
-const MapComponent = dynamic(() => import("@/components/map-component"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-64 bg-gray-100 flex items-center justify-center rounded-md">
-      <p className="text-gray-500">Загрузка карты...</p>
-    </div>
-  ),
-});
-
+// Типизация данных для формы
 const issueSchema = z.object({
   title: z.string().min(5, "Заголовок должен содержать не менее 5 символов"),
   category: z.string().min(1, "Выберите категорию"),
@@ -60,8 +50,12 @@ const issueSchema = z.object({
     .min(20, "Описание должно содержать не менее 20 символов"),
   city: z.string().min(1, "Выберите город"),
   district: z.string().min(1, "Выберите район"),
+  address: z.string().min(5, "Укажите адрес проблемы"),
 });
 
+type FormData = z.infer<typeof issueSchema>;
+
+// Категории (пример)
 const categories = [
   { value: "roads", label: "Дороги" },
   { value: "lighting", label: "Освещение" },
@@ -72,7 +66,23 @@ const categories = [
   { value: "other", label: "Другое" },
 ];
 
-type FormData = z.infer<typeof issueSchema>;
+// Тип для массива районов
+interface DistrictOption {
+  value: string;
+  label: string;
+}
+
+// Тип для города
+interface CityOption {
+  value: string;
+  label: string;
+  districts: DistrictOption[];
+}
+
+// Тип для общего объекта с городами/районами
+interface CityDistrictsData {
+  cities: CityOption[];
+}
 
 export default function AddIssuePage() {
   const router = useRouter();
@@ -84,16 +94,19 @@ export default function AddIssuePage() {
   const [error, setError] = useState<string | null>(null);
   const [isEdit, setIsEdit] = useState(!!issueId);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null
+
+  // FIX: мемоизируем данные, чтобы при каждом ререндере не возвращался новый объект
+  const cityDistrictsData: CityDistrictsData = useMemo(
+    () => getCityDistricts(),
+    []
   );
 
-  // Get city and district data
-  const cityDistrictsData = getCityDistricts();
+  // Храним доступные районы отдельно
   const [availableDistricts, setAvailableDistricts] = useState<
-    { value: string; label: string }[]
+    DistrictOption[]
   >([]);
 
+  // Инициализируем форму с react-hook-form
   const form = useForm<FormData>({
     resolver: zodResolver(issueSchema),
     defaultValues: {
@@ -102,28 +115,35 @@ export default function AddIssuePage() {
       description: "",
       city: "",
       district: "",
+      address: "",
     },
   });
 
-  // Get the selected city and update available districts
+  // Следим за изменением значения города
   const selectedCity = form.watch("city");
 
+  // FIX: Убрали cityDistrictsData.cities из зависимостей, т.к. они теперь неизменны (useMemo)
   useEffect(() => {
     if (selectedCity) {
-      const cityData = cityDistrictsData.cities.find(
+      const foundCity = cityDistrictsData.cities.find(
         (city) => city.value === selectedCity
       );
-      setAvailableDistricts(cityData ? cityData.districts : []);
-
-      // Reset district when city changes
-      if (!isEdit) {
-        form.setValue("district", "");
+      if (foundCity) {
+        setAvailableDistricts(foundCity.districts);
+        // Если мы не в режиме редактирования, сбрасываем выбранный район
+        if (!isEdit) {
+          form.setValue("district", "");
+        }
+      } else {
+        setAvailableDistricts([]);
       }
     } else {
       setAvailableDistricts([]);
     }
-  }, [selectedCity, form, cityDistrictsData.cities, isEdit]);
+    // Только при смене selectedCity и isEdit
+  }, [selectedCity, isEdit, cityDistrictsData, form]);
 
+  // Если у нас есть issueId, значит мы в режиме редактирования — подгружаем данные
   useEffect(() => {
     if (issueId) {
       setTimeout(() => {
@@ -134,52 +154,35 @@ export default function AddIssuePage() {
             "Большая яма на пересечении улиц Ленина и Пушкина. Нужно срочно заделать.",
           city: "almaty",
           district: "almaly",
+          address: "Пересечение улиц Ленина и Пушкина",
         });
         setIsEdit(true);
-        // Добавляем мок-превью для редактирования
+        // Пример заглушки — одна фотография
         setPreviewUrls([
           "https://orda.kz/uploads/posts/2024-07/sizes/1440x810/fa7420a0-93ec-4939-a8f7-09033041788f.webp",
         ]);
-        setLocation({ lat: 43.238949, lng: 76.889709 }); // Almaty coordinates
       }, 500);
-    } else {
-      // Try to get user's location for new issues
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          () => {
-            // Default to Almaty if geolocation is denied
-            setLocation({ lat: 43.238949, lng: 76.889709 });
-          }
-        );
-      } else {
-        // Default coordinates for fallback
-        setLocation({ lat: 43.238949, lng: 76.889709 });
-      }
     }
   }, [issueId, form]);
 
+  // Отправка формы
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     setError(null);
 
     try {
-      // Add location data to the form data
+      // Собираем все данные, включая фотографии
       const submissionData = {
         ...data,
-        location,
-        photos: photos, // Send the file objects
+        photos,
       };
 
       console.log("Submitting issue:", submissionData);
 
-      // Simulate API call
+      // Пример "фейкового" ожидания, будто идёт запрос на сервер
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // После успешного сохранения — переходим на /account/issues
       router.push("/account/issues");
     } catch (err) {
       setError("Ошибка при сохранении проблемы");
@@ -188,12 +191,12 @@ export default function AddIssuePage() {
     }
   };
 
+  // Обработчики для фотографий
   const handleFileChange = (files: FileList | null) => {
     if (files) {
       const fileArray = Array.from(files);
       setPhotos(fileArray);
-
-      // Create preview URLs
+      // Генерируем ссылки для предварительного просмотра
       const newPreviewUrls = fileArray.map((file) => URL.createObjectURL(file));
       setPreviewUrls(newPreviewUrls);
     }
@@ -208,10 +211,6 @@ export default function AddIssuePage() {
     if (e.dataTransfer.files) {
       handleFileChange(e.dataTransfer.files);
     }
-  };
-
-  const handleMapClick = (coords: { lat: number; lng: number }) => {
-    setLocation(coords);
   };
 
   return (
@@ -244,6 +243,7 @@ export default function AddIssuePage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6 mt-4"
               >
+                {/* Заголовок */}
                 <FormField
                   control={form.control}
                   name="title"
@@ -268,6 +268,7 @@ export default function AddIssuePage() {
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Категория */}
                   <FormField
                     control={form.control}
                     name="category"
@@ -280,7 +281,7 @@ export default function AddIssuePage() {
                           <FormControl>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
                                 <SelectValue placeholder="Выберите категорию" />
@@ -290,7 +291,6 @@ export default function AddIssuePage() {
                                   <SelectItem
                                     key={category.value}
                                     value={category.value}
-                                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
                                   >
                                     {category.label}
                                   </SelectItem>
@@ -305,6 +305,7 @@ export default function AddIssuePage() {
                     )}
                   />
 
+                  {/* Город */}
                   <FormField
                     control={form.control}
                     name="city"
@@ -317,7 +318,7 @@ export default function AddIssuePage() {
                           <FormControl>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
                                 <SelectValue placeholder="Выберите город" />
@@ -327,7 +328,6 @@ export default function AddIssuePage() {
                                   <SelectItem
                                     key={city.value}
                                     value={city.value}
-                                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
                                   >
                                     {city.label}
                                   </SelectItem>
@@ -343,50 +343,77 @@ export default function AddIssuePage() {
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="district"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">
-                        Район
-                      </FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            disabled={!selectedCity}
-                          >
-                            <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
-                              <SelectValue
-                                placeholder={
-                                  selectedCity
-                                    ? "Выберите район"
-                                    : "Сначала выберите город"
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
-                              {availableDistricts.map((district) => (
-                                <SelectItem
-                                  key={district.value}
-                                  value={district.value}
-                                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900"
-                                >
-                                  {district.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FaMapMarkerAlt className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
-                      </div>
-                      <FormMessage className="text-sm font-medium text-red-500" />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Район */}
+                  <FormField
+                    control={form.control}
+                    name="district"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Район
+                        </FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                              disabled={!selectedCity}
+                            >
+                              <SelectTrigger className="w-full !pl-10 h-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+                                <SelectValue
+                                  placeholder={
+                                    selectedCity
+                                      ? "Выберите район"
+                                      : "Сначала выберите город"
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-md">
+                                {availableDistricts.map((district) => (
+                                  <SelectItem
+                                    key={district.value}
+                                    value={district.value}
+                                  >
+                                    {district.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FaMapMarkerAlt className="absolute left-3 top-3 h-4 w-4 text-blue-400 z-10" />
+                        </div>
+                        <FormMessage className="text-sm font-medium text-red-500" />
+                      </FormItem>
+                    )}
+                  />
 
+                  {/* Адрес */}
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Адрес
+                        </FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              placeholder="Например: ул. Ленина, 15"
+                              {...field}
+                              className="!pl-10 h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-blue-500"
+                            />
+                          </FormControl>
+                          <FaAddressCard className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
+                        </div>
+                        <FormMessage className="text-sm font-medium text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Описание проблемы */}
                 <FormField
                   control={form.control}
                   name="description"
@@ -408,28 +435,7 @@ export default function AddIssuePage() {
                   )}
                 />
 
-                <div className="space-y-2">
-                  <FormLabel className="text-sm font-medium">
-                    Местоположение на карте
-                  </FormLabel>
-                  <p className="text-xs text-gray-500 mb-2">
-                    Укажите точное местоположение проблемы на карте, кликнув по
-                    нужной точке
-                  </p>
-                  <div className="w-full h-64 rounded-md overflow-hidden border border-gray-200">
-                    <MapComponent
-                      location={location}
-                      onLocationSelect={handleMapClick}
-                    />
-                  </div>
-                  {location && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Выбранные координаты: {location.lat.toFixed(6)},{" "}
-                      {location.lng.toFixed(6)}
-                    </p>
-                  )}
-                </div>
-
+                {/* Фотографии */}
                 <div className="space-y-2">
                   <FormLabel className="text-sm font-medium">
                     Фотографии
@@ -465,6 +471,7 @@ export default function AddIssuePage() {
                     </Button>
                   </div>
 
+                  {/* Превью фотографий */}
                   {previewUrls.length > 0 && (
                     <div className="mt-4">
                       <p className="text-sm font-medium mb-2">
@@ -511,12 +518,14 @@ export default function AddIssuePage() {
                   </FormDescription>
                 </div>
 
+                {/* Сообщение об ошибке */}
                 {error && (
                   <div className="p-3 bg-red-50 text-sm font-medium text-red-500 rounded-md">
                     {error}
                   </div>
                 )}
 
+                {/* Кнопки отправки/отмены */}
                 <div className="flex flex-col sm:flex-row justify-end gap-2">
                   <Button
                     type="button"
@@ -528,7 +537,7 @@ export default function AddIssuePage() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={loading || !location}
+                    disabled={loading}
                     className="bg-blue-500 text-white hover:bg-blue-600"
                   >
                     {loading

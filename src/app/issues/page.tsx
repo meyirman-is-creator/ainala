@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -43,9 +43,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 
 const categories = [
   { value: "all", label: "Все категории" },
@@ -69,16 +67,14 @@ export default function IssuesPage() {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [dateRange, setDateRange] = useState<"from" | "to">("from");
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
   const itemsPerPage = 5;
 
-  // State for liked issues
   const [likedIssues, setLikedIssues] = useState<Record<string, boolean>>({});
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
 
-  // Get city and district data
   const cityDistrictsData = getCityDistricts();
 
-  // Get available districts based on selected city
   const getAvailableDistricts = () => {
     if (selectedCity === "all") {
       return [];
@@ -90,7 +86,6 @@ export default function IssuesPage() {
     return cityData ? cityData.districts : [];
   };
 
-  // Имитация данных проблем с большим количеством разных записей
   const [issues] = useState([
     {
       id: "1",
@@ -252,14 +247,13 @@ export default function IssuesPage() {
     },
   ]);
 
-  // Initialize like counts
-  useState(() => {
+  useEffect(() => {
     const initialLikeCounts: Record<string, number> = {};
     issues.forEach((issue) => {
       initialLikeCounts[issue.id] = issue.likes;
     });
     setLikeCounts(initialLikeCounts);
-  });
+  }, [issues]);
 
   const filteredIssues = (status: string) => {
     return issues
@@ -280,7 +274,6 @@ export default function IssuesPage() {
           selectedDistrict === "all" || issue.district === selectedDistrict
       )
       .filter((issue) => {
-        // Filter by date range
         if (dateFrom || dateTo) {
           const issueDate = new Date(issue.createdAt);
           const isAfterStart = dateFrom ? issueDate >= dateFrom : true;
@@ -328,11 +321,11 @@ export default function IssuesPage() {
 
   const handleCityChange = (city: string) => {
     setSelectedCity(city);
-    setSelectedDistrict("all"); // Reset district when city changes
+    setSelectedDistrict("all");
     setCurrentPage(1);
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
+  const handleDateSelect = (date: Date) => {
     if (dateRange === "from") {
       setDateFrom(date);
       setDateRange("to");
@@ -348,6 +341,75 @@ export default function IssuesPage() {
     setDateTo(undefined);
     setDateRange("from");
     setCurrentPage(1);
+  };
+
+  const renderCalendar = () => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const firstDayIndex = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    const today = new Date();
+    const days = [];
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      days.push(<div key={`empty-${i}`} className="h-8 w-8 mx-auto"></div>);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayDate = new Date(year, month, day);
+
+      // Проверка, находится ли дата в выбранном диапазоне
+      const isInRange =
+        dateFrom &&
+        dateTo &&
+        dayDate >= new Date(dateFrom.setHours(0, 0, 0, 0)) &&
+        dayDate <= new Date(dateTo.setHours(23, 59, 59, 999));
+
+      // Проверка, является ли дата начальной или конечной
+      const isSelectedFrom =
+        dateFrom &&
+        day === dateFrom.getDate() &&
+        month === dateFrom.getMonth() &&
+        year === dateFrom.getFullYear();
+
+      const isSelectedTo =
+        dateTo &&
+        day === dateTo.getDate() &&
+        month === dateTo.getMonth() &&
+        year === dateTo.getFullYear();
+
+      const isToday =
+        today.getDate() === day &&
+        today.getMonth() === month &&
+        today.getFullYear() === year;
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => handleDateSelect(new Date(year, month, day))}
+          className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
+            isSelectedFrom
+              ? "bg-blue-500 text-white font-medium"
+              : isSelectedTo
+              ? "bg-blue-700 text-white font-medium"
+              : isInRange
+              ? "bg-blue-100 text-blue-700"
+              : isToday
+              ? "bg-gray-100 text-blue-600 font-medium"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          {day}
+        </button>
+      );
+    }
+
+    return days;
   };
 
   return (
@@ -367,7 +429,7 @@ export default function IssuesPage() {
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
             <Input
               placeholder="Поиск проблем..."
-              className="!pl-[35px] h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm"
+              className="pl-9 h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -498,12 +560,78 @@ export default function IssuesPage() {
                   Сбросить
                 </Button>
               </div>
-              <Calendar
-                mode="single"
-                selected={dateRange === "from" ? dateFrom : dateTo}
-                onSelect={handleDateSelect}
-                initialFocus
-              />
+              <div className="p-3 border-t">
+                <div className="flex justify-between items-center mb-4">
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-100"
+                    onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() - 1);
+                      setCalendarDate(newDate);
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+
+                  <h3 className="text-lg font-medium">
+                    {new Intl.DateTimeFormat("ru-RU", {
+                      month: "long",
+                      year: "numeric",
+                    }).format(calendarDate)}
+                  </h3>
+
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-100"
+                    onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() + 1);
+                      setCalendarDate(newDate);
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                  <div className="text-sm font-medium">Вс</div>
+                  <div className="text-sm font-medium">Пн</div>
+                  <div className="text-sm font-medium">Вт</div>
+                  <div className="text-sm font-medium">Ср</div>
+                  <div className="text-sm font-medium">Чт</div>
+                  <div className="text-sm font-medium">Пт</div>
+                  <div className="text-sm font-medium">Сб</div>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 text-center">
+                  {renderCalendar()}
+                </div>
+              </div>
             </PopoverContent>
           </Popover>
         </div>
@@ -590,7 +718,6 @@ export default function IssuesPage() {
                       className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow transition-shadow"
                     >
                       <div className="flex flex-col md:flex-row">
-                        {/* Added photo column */}
                         <div className="w-full md:w-1/3 relative min-h-[160px]">
                           <Image
                             src={issue.photo}

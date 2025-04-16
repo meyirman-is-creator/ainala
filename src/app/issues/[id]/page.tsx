@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -26,6 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAppSelector } from "@/lib/store";
 import { formatDate, getCategoryName, getStatusName } from "@/lib/utils";
+import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 export default function IssueDetailsPage() {
   const { id } = useParams();
@@ -34,6 +38,7 @@ export default function IssueDetailsPage() {
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(15);
+  const [mapInitialized, setMapInitialized] = useState(false);
 
   // Имитация данных проблемы
   const [issue] = useState({
@@ -87,12 +92,40 @@ export default function IssueDetailsPage() {
     resultPhotos: [
       "https://auto-dor.com.ua/wp-content/uploads/2019/11/remont-dorog.jpg",
     ],
-    location: "Пересечение улиц Ленина и Пушкина",
+    location: {
+      lat: 43.238949,
+      lng: 76.889709,
+    },
+    address: "Пересечение улиц Ленина и Пушкина",
     deadline: new Date(2023, 4, 1).toISOString(),
     assignedTo: "Дорожная служба",
     adminComment:
       "Проблема решена, яма заделана. Проведен ремонт дорожного покрытия и нанесена разметка для предотвращения аварийных ситуаций.",
   });
+
+  useEffect(() => {
+    if (!mapInitialized && issue.location && typeof window !== "undefined") {
+      const mapContainer = document.getElementById("map");
+
+      if (mapContainer) {
+        const map = new mapboxgl.Map({
+          container: "map",
+          style: "mapbox://styles/mapbox/streets-v11",
+          center: [issue.location.lng, issue.location.lat],
+          zoom: 14,
+        });
+
+        map.on("load", () => {
+          // Add marker
+          new mapboxgl.Marker()
+            .setLngLat([issue.location.lng, issue.location.lat])
+            .addTo(map);
+
+          setMapInitialized(true);
+        });
+      }
+    }
+  }, [issue.location, mapInitialized]);
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,7 +210,7 @@ export default function IssueDetailsPage() {
                     <FaMapMarkerAlt className="text-blue-500" />
                     <div>
                       <p className="text-gray-500">Местоположение:</p>
-                      <p className="font-medium">{issue.location}</p>
+                      <p className="font-medium">{issue.address}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -261,6 +294,23 @@ export default function IssueDetailsPage() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+              <CardHeader className="p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-white">
+                <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-900">
+                  Местоположение
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div
+                  id="map"
+                  className="w-full h-64 mt-4 rounded-md border border-gray-200"
+                ></div>
+                <p className="text-sm text-gray-500 mt-2">
+                  Адрес: {issue.address}
+                </p>
               </CardContent>
             </Card>
 
@@ -458,7 +508,6 @@ export default function IssueDetailsPage() {
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </div>

@@ -67,7 +67,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -109,6 +108,8 @@ export default function IssuesPage() {
   // Filter states
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Get all possible statuses based on user role
   const getStatusesForRole = () => {
@@ -378,6 +379,74 @@ export default function IssuesPage() {
     );
   };
 
+  const hasIssueOnDate = (day: Date) => {
+    return issues.some((issue) => {
+      const issueDate = new Date(issue.createdAt);
+      return (
+        day.getDate() === issueDate.getDate() &&
+        day.getMonth() === issueDate.getMonth() &&
+        day.getFullYear() === issueDate.getFullYear()
+      );
+    });
+  };
+
+  const renderCalendar = () => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const firstDayIndex = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    const today = new Date();
+    const days = [];
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      days.push(<div key={`empty-${i}`} className="h-8 w-8 mx-auto"></div>);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayDate = new Date(year, month, day);
+      const hasIssue = hasIssueOnDate(dayDate);
+      const isSelected =
+        selectedDate &&
+        selectedDate.getDate() === day &&
+        selectedDate.getMonth() === month &&
+        selectedDate.getFullYear() === year;
+      const isToday =
+        today.getDate() === day &&
+        today.getMonth() === month &&
+        today.getFullYear() === year;
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => {
+            const newDate = new Date(year, month, day);
+            setSelectedDate(newDate);
+            setDateFilter(newDate);
+            setCalendarOpen(false);
+          }}
+          className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
+            isToday
+              ? "bg-blue-100 text-blue-600 font-bold"
+              : isSelected
+              ? "bg-blue-500 text-white"
+              : hasIssue
+              ? "bg-blue-50 text-blue-600 font-medium"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          {day}
+        </button>
+      );
+    }
+
+    return days;
+  };
+
   return (
     <div className="bg-gray-50 py-6">
       <div className="container max-w-[1200px] px-[15px] mx-auto space-y-6">
@@ -418,7 +487,7 @@ export default function IssuesPage() {
             />
           </div>
 
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -431,15 +500,79 @@ export default function IssuesPage() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => {
-                  setSelectedDate(date);
-                  setDateFilter(date);
-                }}
-                initialFocus
-              />
+              <div className="p-3 border-t">
+                <div className="flex justify-between items-center mb-4">
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-100"
+                    onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() - 1);
+                      setCalendarDate(newDate);
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+
+                  <h3 className="text-lg font-medium">
+                    {new Intl.DateTimeFormat("ru-RU", {
+                      month: "long",
+                      year: "numeric",
+                    }).format(calendarDate)}
+                  </h3>
+
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-100"
+                    onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() + 1);
+                      setCalendarDate(newDate);
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                  <div className="text-sm font-medium">Вс</div>
+                  <div className="text-sm font-medium">Пн</div>
+                  <div className="text-sm font-medium">Вт</div>
+                  <div className="text-sm font-medium">Ср</div>
+                  <div className="text-sm font-medium">Чт</div>
+                  <div className="text-sm font-medium">Пт</div>
+                  <div className="text-sm font-medium">Сб</div>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 text-center">
+                  {renderCalendar()}
+                </div>
+              </div>
+
               {dateFilter && (
                 <div className="px-4 pb-2">
                   <Button
@@ -448,6 +581,7 @@ export default function IssuesPage() {
                     onClick={() => {
                       setSelectedDate(undefined);
                       setDateFilter(undefined);
+                      setCalendarOpen(false);
                     }}
                   >
                     Сбросить фильтр

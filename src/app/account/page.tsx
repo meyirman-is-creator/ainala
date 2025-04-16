@@ -1,4 +1,3 @@
-// src/app/account/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -22,9 +21,8 @@ import { formatDate } from "@/lib/utils";
 
 export default function AccountPage() {
   const { user } = useAppSelector((state) => state.auth);
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
 
-  // Имитация данных проблем
   const [issues] = useState([
     {
       id: "1",
@@ -53,7 +51,6 @@ export default function AccountPage() {
   ]);
 
   const filteredIssues = issues.filter((issue) => {
-    if (!date) return false;
     const issueDate = new Date(issue.createdAt);
     return (
       issueDate.getDate() === date.getDate() &&
@@ -69,7 +66,6 @@ export default function AccountPage() {
     todo: issues.filter((issue) => issue.status === "to do").length,
   };
 
-  // Function to check if a date has issues
   const hasIssueOnDate = (day: Date) => {
     return issues.some((issue) => {
       const issueDate = new Date(issue.createdAt);
@@ -79,6 +75,54 @@ export default function AccountPage() {
         day.getFullYear() === issueDate.getFullYear()
       );
     });
+  };
+
+  const renderCalendar = () => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const firstDayIndex = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    const today = new Date();
+    const days = [];
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      days.push(<div key={`empty-${i}`} className="h-8 w-8 mx-auto"></div>);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayDate = new Date(year, month, day);
+      const hasIssue = hasIssueOnDate(dayDate);
+      const isSelected = date.getDate() === day;
+      const isToday =
+        today.getDate() === day &&
+        today.getMonth() === month &&
+        today.getFullYear() === year;
+
+      days.push(
+        <button
+          key={day}
+          onClick={() => setDate(new Date(year, month, day))}
+          className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
+            isToday
+              ? "bg-blue-100 text-blue-600 font-bold"
+              : isSelected
+              ? "bg-blue-500 text-white"
+              : hasIssue
+              ? "bg-blue-50 text-blue-600 font-medium"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          {day}
+        </button>
+      );
+    }
+
+    return days;
   };
 
   return (
@@ -231,7 +275,7 @@ export default function AccountPage() {
                 <button
                   className="p-1 rounded-full hover:bg-gray-100"
                   onClick={() => {
-                    const newDate = new Date(date || new Date());
+                    const newDate = new Date(date);
                     newDate.setMonth(newDate.getMonth() - 1);
                     setDate(newDate);
                   }}
@@ -253,18 +297,16 @@ export default function AccountPage() {
                 </button>
 
                 <h3 className="text-lg font-medium">
-                  {date
-                    ? new Intl.DateTimeFormat("ru-RU", {
-                        month: "long",
-                        year: "numeric",
-                      }).format(date)
-                    : "Выберите дату"}
+                  {new Intl.DateTimeFormat("ru-RU", {
+                    month: "long",
+                    year: "numeric",
+                  }).format(date)}
                 </h3>
 
                 <button
                   className="p-1 rounded-full hover:bg-gray-100"
                   onClick={() => {
-                    const newDate = new Date(date || new Date());
+                    const newDate = new Date(date);
                     newDate.setMonth(newDate.getMonth() + 1);
                     setDate(newDate);
                   }}
@@ -297,66 +339,7 @@ export default function AccountPage() {
               </div>
 
               <div className="grid grid-cols-7 gap-1 text-center">
-                {(() => {
-                  const currentDate = date || new Date();
-                  const year = currentDate.getFullYear();
-                  const month = currentDate.getMonth();
-
-                  // First day of the month
-                  const firstDay = new Date(year, month, 1);
-                  // Last day of the month
-                  const lastDay = new Date(year, month + 1, 0);
-
-                  // Get the day of the week for the first day (0 = Sunday, 1 = Monday, etc.)
-                  const firstDayIndex = firstDay.getDay();
-
-                  // Total days in the month
-                  const daysInMonth = lastDay.getDate();
-
-                  // Create an array to hold all calendar days
-                  const days = [];
-
-                  // Add empty cells for days before the first day of the month
-                  for (let i = 0; i < firstDayIndex; i++) {
-                    days.push(
-                      <div key={`empty-${i}`} className="h-8 w-8 mx-auto"></div>
-                    );
-                  }
-
-                  // Add days of the month
-                  for (let day = 1; day <= daysInMonth; day++) {
-                    const dayDate = new Date(year, month, day);
-                    const hasIssue = hasIssueOnDate(dayDate);
-                    const isSelected =
-                      date &&
-                      date.getDate() === day &&
-                      date.getMonth() === month;
-                    const isToday =
-                      new Date().getDate() === day &&
-                      new Date().getMonth() === month &&
-                      new Date().getFullYear() === year;
-
-                    days.push(
-                      <button
-                        key={day}
-                        onClick={() => setDate(new Date(year, month, day))}
-                        className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center text-sm ${
-                          isToday
-                            ? "bg-blue-100 text-blue-600 font-bold"
-                            : isSelected
-                            ? "bg-blue-500 text-white"
-                            : hasIssue
-                            ? "bg-blue-50 text-blue-600 font-medium"
-                            : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    );
-                  }
-
-                  return days;
-                })()}
+                {renderCalendar()}
               </div>
             </CardContent>
           </Card>
@@ -364,7 +347,7 @@ export default function AccountPage() {
           <Card className="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
             <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-white">
               <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-900">
-                Проблемы за {date ? formatDate(date) : "выбранную дату"}
+                Проблемы за {formatDate(date)}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
