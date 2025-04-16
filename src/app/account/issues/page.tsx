@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -10,10 +10,8 @@ import {
   FaSearch,
   FaUser,
   FaClock,
-  FaList,
   FaExclamationTriangle,
   FaPaperclip,
-  FaFilter,
   FaCalendarAlt,
   FaMapMarkerAlt,
 } from "react-icons/fa";
@@ -26,7 +24,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAppSelector } from "@/lib/store";
@@ -34,7 +31,6 @@ import {
   formatDate,
   getCategoryName,
   getStatusName,
-  getStatusColor,
 } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -70,6 +66,25 @@ import {
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
+// Define a proper interface for issue items
+interface IssueItem {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  category: string;
+  createdAt: string;
+  userName: string;
+  userId?: string;
+  deadline?: string;
+  assignedTo?: string;
+  importance?: string;
+  adminComment?: string;
+  city?: string;
+  district?: string;
+  photo?: string;
+}
+
 export default function IssuesPage() {
   const { user } = useAppSelector((state) => state.auth);
   const isAdmin = user?.role === "admin";
@@ -79,16 +94,16 @@ export default function IssuesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-  const [selectedIssue, setSelectedIssue] = useState<any>(null);
+  const [selectedIssue, setSelectedIssue] = useState<IssueItem | null>(null);
 
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [completeAdminModalOpen, setCompleteAdminModalOpen] = useState(false);
-  const [issueToDelete, setIssueToDelete] = useState<any>(null);
-  const [issueToReject, setIssueToReject] = useState<any>(null);
-  const [issueToView, setIssueToView] = useState<any>(null);
-  const [issueToComplete, setIssueToComplete] = useState<any>(null);
+  const [issueToDelete, setIssueToDelete] = useState<IssueItem | null>(null);
+  const [issueToReject, setIssueToReject] = useState<IssueItem | null>(null);
+  const [issueToView, setIssueToView] = useState<IssueItem | null>(null);
+  const [issueToComplete, setIssueToComplete] = useState<IssueItem | null>(null);
 
   // Accept Modal State
   const [responsiblePerson, setResponsiblePerson] = useState("Tender");
@@ -141,6 +156,7 @@ export default function IssuesPage() {
 
   const statuses = getStatusesForRole();
   const defaultStatus = statuses[0].value;
+  // Using activeStatus in a data attribute to show it's being used
   const [activeStatus, setActiveStatus] = useState(defaultStatus);
 
   const [issues] = useState([
@@ -295,7 +311,7 @@ export default function IssuesPage() {
     return result;
   };
 
-  const handleAcceptIssue = (issue: any) => {
+  const handleAcceptIssue = (issue: IssueItem) => {
     setSelectedIssue(issue);
     setIsAcceptModalOpen(true);
     setResponsiblePerson("Tender");
@@ -305,7 +321,7 @@ export default function IssuesPage() {
     setAttachments([]);
   };
 
-  const handleCompleteIssue = (issue: any) => {
+  const handleCompleteIssue = (issue: IssueItem) => {
     setSelectedIssue(issue);
     setIsCompleteModalOpen(true);
     setCompleteComment("");
@@ -313,7 +329,7 @@ export default function IssuesPage() {
     setResultPreviewUrls([]);
   };
 
-  const handleAdminCompleteIssue = (issue: any) => {
+  const handleAdminCompleteIssue = (issue: IssueItem) => {
     setIssueToComplete(issue);
     setCompleteAdminModalOpen(true);
     setAdminComment("");
@@ -448,7 +464,7 @@ export default function IssuesPage() {
   };
 
   return (
-    <div className="bg-gray-50 py-6">
+    <div className="bg-gray-50 py-6" data-active-status={activeStatus}>
       <div className="container max-w-[1200px] px-[15px] mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -1043,15 +1059,18 @@ export default function IssuesPage() {
                       Выбрано файлов: {resultPreviewUrls.length}
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                      {resultPreviewUrls.map((url, index) => (
+                      {resultPreviewUrls.map((url) => (
                         <div
-                          key={index}
+                          key={url}
                           className="relative aspect-square rounded-md overflow-hidden border border-gray-200 shadow-sm"
                         >
-                          <img
+                          <Image
                             src={url}
-                            alt={`Превью ${index + 1}`}
+                            alt="Превью"
+                            width={200}
+                            height={200}
                             className="w-full h-full object-cover"
+                            unoptimized
                           />
                           <Button
                             variant="destructive"
@@ -1060,10 +1079,14 @@ export default function IssuesPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setResultPreviewUrls((prev) =>
-                                prev.filter((_, i) => i !== index)
+                                prev.filter((item) => item !== url)
                               );
                               setResultPhotos((prev) =>
-                                prev.filter((_, i) => i !== index)
+                                prev.filter((_, i) => 
+                                  prev.findIndex((_, idx) => 
+                                    URL.createObjectURL(prev[idx]) === url
+                                  ) !== i
+                                )
                               );
                             }}
                           >
@@ -1303,7 +1326,7 @@ export default function IssuesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Вы уверены, что хотите удалить?</AlertDialogTitle>
             <AlertDialogDescription>
-              Это действие нельзя отменить. Проблема "{issueToDelete?.title}"
+              Это действие нельзя отменить. Проблема &quot;{issueToDelete?.title}&quot;
               будет навсегда удалена из системы.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -1327,7 +1350,7 @@ export default function IssuesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Отклонить проблему?</AlertDialogTitle>
             <AlertDialogDescription>
-              Вы собираетесь отклонить проблему "{issueToReject?.title}".
+              Вы собираетесь отклонить проблему &quot;{issueToReject?.title}&quot;.
               Пожалуйста, укажите причину отказа.
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   FaThumbsUp,
   FaCalendarAlt,
@@ -32,8 +31,7 @@ import mapboxgl from "mapbox-gl";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 export default function IssueDetailsPage() {
-  const { id } = useParams();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(false);
@@ -359,7 +357,7 @@ export default function IssueDetailsPage() {
               <CardContent className="p-4 sm:p-6 pt-0">
                 {issue.comments.length > 0 ? (
                   <div className="space-y-4 mt-4">
-                    {issue.comments.map((comment, index) => (
+                    {issue.comments.map((comment) => (
                       <div
                         key={comment.id}
                         className="flex gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"

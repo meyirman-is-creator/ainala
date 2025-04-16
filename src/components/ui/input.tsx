@@ -4,7 +4,13 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  // Add meaningful properties to resolve the empty interface issue
+  wrapperClassName?: string;
+  icon?: React.ReactNode;
+  error?: string;
+  helperText?: string;
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {

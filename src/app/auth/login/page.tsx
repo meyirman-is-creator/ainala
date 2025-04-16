@@ -74,7 +74,7 @@ export default function LoginPage() {
       dispatch(loginSuccess(mockResponse));
 
       router.push("/account");
-    } catch (err) {
+    } catch  {
       setError("Неверный email или пароль");
     } finally {
       setLoading(false);

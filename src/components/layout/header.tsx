@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { FaHome, FaSignInAlt, FaUserPlus, FaTimes } from "react-icons/fa";
+import { FaHome, FaSignInAlt, FaUserPlus } from "react-icons/fa";
 import { useAppSelector } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "./user-nav";
@@ -15,11 +15,10 @@ import {
 } from "@/components/ui/sheet";
 
 export const Header = () => {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close drawer when pathname changes
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);

@@ -28,7 +28,7 @@ export default function VerifyEmailPage() {
 
   const router = useRouter();
 
-  const handleComplete = async (value: string) => {
+  const handleComplete = async () => {
     setLoading(true);
     setError(null);
 
@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
 
       // Перенаправление на страницу входа
       router.push("/auth/login");
-    } catch (err) {
+    } catch {
       setError("Неверный код подтверждения");
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ export default function VerifyEmailPage() {
     try {
       // Имитация запроса к API
       await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (err) {
+    } catch {
       setError("Ошибка при отправке кода");
     } finally {
       setResending(false);

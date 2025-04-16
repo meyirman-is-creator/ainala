@@ -50,7 +50,7 @@ export default function SignUpPage() {
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
     setLoading(true);
     setError(null);
 
@@ -61,7 +61,7 @@ export default function SignUpPage() {
 
       // Перенаправление на страницу верификации
       router.push("/auth/verify-email");
-    } catch (err) {
+    } catch  {
       setError("Ошибка при регистрации. Пожалуйста, попробуйте снова.");
     } finally {
       setLoading(false);

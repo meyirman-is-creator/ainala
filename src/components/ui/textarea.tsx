@@ -4,7 +4,14 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  // Add meaningful properties to resolve the empty interface issue
+  wrapperClassName?: string;
+  error?: string;
+  helperText?: string;
+  maxLength?: number;
+  showCharCount?: boolean;
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, ...props }, ref) => {

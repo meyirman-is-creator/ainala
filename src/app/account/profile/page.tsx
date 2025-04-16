@@ -106,14 +106,14 @@ export default function ProfilePage() {
       );
 
       setSuccess("Профиль успешно обновлен");
-    } catch (err) {
+    } catch  {
       setError("Ошибка при обновлении профиля");
     } finally {
       setLoadingProfile(false);
     }
   };
 
-  const onPasswordSubmit = async (data: PasswordFormData) => {
+  const onPasswordSubmit = async () => {
     setLoadingPassword(true);
     setError(null);
     setSuccess(null);
@@ -129,7 +129,7 @@ export default function ProfilePage() {
       });
 
       setSuccess("Пароль успешно изменен");
-    } catch (err) {
+    } catch  {
       setError("Ошибка при изменении пароля");
     } finally {
       setLoadingPassword(false);

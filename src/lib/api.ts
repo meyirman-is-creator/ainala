@@ -1,12 +1,20 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Issue, Comment, User } from "@/types";
 
+// Define a proper type for the state to avoid using 'any'
+interface RootState {
+  auth: {
+    token: string | null;
+  };
+}
+
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.token;
+      // Use the proper type instead of 'any'
+      const token = (getState() as RootState).auth.token;
 
       if (token) {
         headers.set("authorization", `Bearer ${token}`);

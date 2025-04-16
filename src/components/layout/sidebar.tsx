@@ -8,7 +8,6 @@ import {
   FaUser,
   FaClipboardList,
   FaPlusCircle,
-  FaHome,
   FaChartLine,
 } from "react-icons/fa";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
