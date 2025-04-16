@@ -26,6 +26,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAppSelector } from "@/lib/store";
@@ -127,7 +128,6 @@ export default function IssuesPage() {
         { value: "reject", label: "Отклонено" },
       ];
     } else {
-      // Regular user
       return [
         { value: "to do", label: "К выполнению" },
         { value: "progress", label: "В работе" },
@@ -142,7 +142,6 @@ export default function IssuesPage() {
   const defaultStatus = statuses[0].value;
   const [activeStatus, setActiveStatus] = useState(defaultStatus);
 
-  // Имитация данных проблем с большим количеством разнообразных записей
   const [issues] = useState([
     {
       id: "1",
@@ -267,15 +266,12 @@ export default function IssuesPage() {
   const filteredIssues = (status: string) => {
     let result = issues;
 
-    // Filter by user ID for regular users
     if (isUser && !isAdmin && !isExecutor) {
       result = result.filter((issue) => issue.userId === user?.id);
     }
 
-    // Filter by status
     result = result.filter((issue) => issue.status === status);
 
-    // Filter by search query
     if (searchQuery) {
       result = result.filter(
         (issue) =>
@@ -284,7 +280,6 @@ export default function IssuesPage() {
       );
     }
 
-    // Filter by date
     if (dateFilter) {
       result = result.filter((issue) => {
         const issueDate = new Date(issue.createdAt);
@@ -630,7 +625,6 @@ export default function IssuesPage() {
                         )}
                       </div>
 
-                      {/* Admin actions */}
                       {isAdmin && (
                         <div className="flex gap-2 mt-4">
                           {issue.status === "to do" && (
@@ -679,7 +673,6 @@ export default function IssuesPage() {
                         </div>
                       )}
 
-                      {/* Executor actions */}
                       {isExecutor && (
                         <div className="flex gap-2 mt-4">
                           {issue.status === "progress" && (
@@ -723,7 +716,6 @@ export default function IssuesPage() {
         </Tabs>
       </div>
 
-      {/* Admin Accept Modal (Assign Executor) */}
       <Dialog open={isAcceptModalOpen} onOpenChange={setIsAcceptModalOpen}>
         <DialogContent className="sm:max-w-md md:max-w-lg p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
@@ -843,7 +835,6 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Executor Complete Modal */}
       <Dialog open={isCompleteModalOpen} onOpenChange={setIsCompleteModalOpen}>
         <DialogContent className="sm:max-w-md lg:max-w-lg p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
@@ -985,7 +976,6 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Admin Complete Modal (Approve Completed Issue) */}
       <Dialog
         open={completeAdminModalOpen}
         onOpenChange={setCompleteAdminModalOpen}
@@ -1039,7 +1029,6 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* View Issue Modal */}
       <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
         <DialogContent className="sm:max-w-4xl p-0 rounded-lg overflow-hidden shadow-lg">
           <DialogHeader className="p-6 bg-gradient-to-r from-blue-50 to-white">
@@ -1175,7 +1164,6 @@ export default function IssuesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Modal */}
       <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1200,7 +1188,6 @@ export default function IssuesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Reject Modal */}
       <AlertDialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
